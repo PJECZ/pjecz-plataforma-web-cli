@@ -37,4 +37,4 @@ def consultar(
             "SI" if registro["es_distrito_judicial"] else "NO",
         )
     console.print(table)
-    rich.print(f"Total: [green]{respuesta['total']}[/green] oficinas")
+    rich.print(f"Total: [green]{respuesta['total']}[/green] distritos")
