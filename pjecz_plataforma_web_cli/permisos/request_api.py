@@ -10,13 +10,19 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 
 def get_permisos(
+    modulo_id: int = None,
     limit: int = LIMIT,
     offset: int = 0,
+    rol_id: int = None,
 ) -> Any:
     """Solicitar permisos"""
     parametros = {"limit": limit}
+    if modulo_id is not None:
+        parametros["modulo_id"] = modulo_id
     if offset > 0:
         parametros["offset"] = offset
+    if rol_id is not None:
+        parametros["rol_id"] = rol_id
     try:
         respuesta = requests.get(
             f"{BASE_URL}/permisos",

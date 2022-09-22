@@ -1,8 +1,6 @@
 """
 CLI Domicilios App
 """
-from datetime import datetime
-
 import rich
 import typer
 
