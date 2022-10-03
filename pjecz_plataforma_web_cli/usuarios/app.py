@@ -1,6 +1,9 @@
 """
 CLI Usuarios App
 """
+import csv
+from datetime import datetime
+
 import rich
 import typer
 
@@ -17,12 +20,15 @@ def consultar(
     autoridad_id: int = None,
     autoridad_clave: str = None,
     limit: int = LIMIT,
+    guardar: bool = False,
     oficina_id: int = None,
     oficina_clave: str = None,
     offset: int = 0,
 ):
     """Consultar usuarios"""
     rich.print("Consultar usuarios...")
+
+    # Solicitar datos
     try:
         respuesta = get_usuarios(
             autoridad_id=autoridad_id,
@@ -35,8 +41,35 @@ def consultar(
     except CLIAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Encabezados
+    encabezados = ["ID", "Distrito", "Autoridad", "Oficina", "email", "Nombres", "A. Paterno", "A. Materno"]
+
+    # Guardar datos en un archivo CSV
+    if guardar:
+        fecha_hora = datetime.now().strftime("%Y%m%d%H%M%S")
+        nombre_archivo_csv = f"usuarios_{fecha_hora}.csv"
+        with open(nombre_archivo_csv, "w", encoding="utf-8") as archivo:
+            escritor = csv.writer(archivo)
+            escritor.writerow(encabezados)
+            for registro in respuesta["items"]:
+                escritor.writerow(
+                    [
+                        registro["id"],
+                        registro["distrito_nombre_corto"],
+                        registro["autoridad_descripcion_corta"],
+                        registro["oficina_clave"],
+                        registro["email"],
+                        registro["nombres"],
+                        registro["apellido_paterno"],
+                        registro["apellido_materno"],
+                    ]
+                )
+        rich.print(f"Datos guardados en el archivo {nombre_archivo_csv}")
+
+    # Mostrar la tabla
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Distrito", "Autoridad", "Oficina", "email", "Nombres", "A. Paterno", "A. Materno")
+    table = rich.table.Table()
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
@@ -49,4 +82,6 @@ def consultar(
             registro["apellido_materno"],
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] usuarios")
