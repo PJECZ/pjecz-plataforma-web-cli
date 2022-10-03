@@ -16,6 +16,7 @@ def get_usuarios(
     oficina_id: int = None,
     oficina_clave: str = None,
     offset: int = 0,
+    workspace: str = None,
 ) -> Any:
     """Solicitar usuarios"""
     parametros = {"limit": limit}
@@ -29,6 +30,8 @@ def get_usuarios(
         parametros["oficina_id"] = oficina_id
     if oficina_clave is not None:
         parametros["oficina_clave"] = oficina_clave
+    if workspace is not None:
+        parametros["workspace"] = workspace
     try:
         respuesta = requests.get(
             f"{BASE_URL}/usuarios",

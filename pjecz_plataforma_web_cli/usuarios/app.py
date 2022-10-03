@@ -24,6 +24,7 @@ def consultar(
     oficina_id: int = None,
     oficina_clave: str = None,
     offset: int = 0,
+    workspace: str = None,
 ):
     """Consultar usuarios"""
     rich.print("Consultar usuarios...")
@@ -37,13 +38,14 @@ def consultar(
             oficina_id=oficina_id,
             oficina_clave=oficina_clave,
             offset=offset,
+            workspace=workspace,
         )
     except CLIAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
     # Encabezados
-    encabezados = ["ID", "Distrito", "Autoridad", "Oficina", "email", "Nombres", "A. Paterno", "A. Materno"]
+    encabezados = ["ID", "Distrito", "Autoridad", "Oficina", "email", "Nombres", "A. Paterno", "A. Materno", "Workspace"]
 
     # Guardar datos en un archivo CSV
     if guardar:
@@ -63,6 +65,7 @@ def consultar(
                         registro["nombres"],
                         registro["apellido_paterno"],
                         registro["apellido_materno"],
+                        registro["workspace"],
                     ]
                 )
         rich.print(f"Datos guardados en el archivo {nombre_archivo_csv}")
@@ -70,6 +73,8 @@ def consultar(
     # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
@@ -80,6 +85,7 @@ def consultar(
             registro["nombres"],
             registro["apellido_paterno"],
             registro["apellido_materno"],
+            registro["workspace"],
         )
     console.print(table)
 
