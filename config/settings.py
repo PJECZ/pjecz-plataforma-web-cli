@@ -10,15 +10,12 @@ load_dotenv()
 
 # Host and base URL
 HOST = os.getenv("HOST", "")
-BASE_URL = f"{HOST}/v2"
+BASE_URL = f"{HOST}/v1"
 
 # Default limit and timeout in seconds
+API_KEY = os.getenv("API_KEY", "")
 LIMIT = int(os.getenv("LIMIT", "40"))
 TIMEOUT = int(os.getenv("TIMEOUT", "12"))
-
-# Username and password
-USERNAME = os.getenv("USERNAME", "")
-PASSWORD = os.getenv("PASSWORD", "")
 
 # SendGrid
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")

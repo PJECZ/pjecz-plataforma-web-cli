@@ -1,5 +1,5 @@
 """
-CLI Oficinas App
+CLI Centros de Trabajo App
 """
 import rich
 import typer
@@ -7,7 +7,7 @@ import typer
 from common.exceptions import CLIAnyError
 from config.settings import LIMIT
 
-from .request_api import get_oficinas
+from .request_api import get_centros_trabajos
 
 app = typer.Typer()
 
@@ -17,34 +17,30 @@ def consultar(
     distrito_id: int = None,
     domicilio_id: int = None,
     limit: int = LIMIT,
-    puede_agendar_citas: bool = True,
     offset: int = 0,
 ):
-    """Consultar oficinas"""
-    rich.print("Consultar oficinas...")
+    """Consultar centros de trabajo"""
+    rich.print("Consultar centros de trabajo...")
     try:
-        respuesta = get_oficinas(
+        respuesta = get_centros_trabajos(
             distrito_id=distrito_id,
             domicilio_id=domicilio_id,
             limit=limit,
-            puede_agendar_citas=puede_agendar_citas,
             offset=offset,
         )
     except CLIAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Clave", "Distrito", "Descripcion", "P.A.C.", "Apertura", "Cierre", "L.P.")
+    table = rich.table.Table("ID", "Clave", "Nombre", "Distrito", "Domicilio", "Telefono")
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
             registro["clave"],
+            registro["nombre"],
             registro["distrito_nombre_corto"],
-            registro["descripcion_corta"],
-            "SI" if bool(registro["puede_agendar_citas"]) else "",
-            registro["apertura"],
-            registro["cierre"],
-            str(registro["limite_personas"]),
+            registro["domicilio_completo"],
+            registro["telefono"],
         )
     console.print(table)
-    rich.print(f"Total: [green]{respuesta['total']}[/green] oficinas")
+    rich.print(f"Total: [green]{respuesta['total']}[/green] centros de trabajo")

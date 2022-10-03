@@ -1,5 +1,5 @@
 """
-CLI Materias Request API
+CLI Permisos Request API
 """
 from typing import Any
 
@@ -9,31 +9,37 @@ from common.exceptions import CLIConnectionError, CLIRequestError, CLIResponseEr
 from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 
-def get_materias(
+def get_permisos(
+    modulo_id: int = None,
     limit: int = LIMIT,
     offset: int = 0,
+    rol_id: int = None,
 ) -> Any:
-    """Solicitar materias"""
+    """Solicitar permisos"""
     parametros = {"limit": limit}
+    if modulo_id is not None:
+        parametros["modulo_id"] = modulo_id
     if offset > 0:
         parametros["offset"] = offset
+    if rol_id is not None:
+        parametros["rol_id"] = rol_id
     try:
         respuesta = requests.get(
-            f"{BASE_URL}/materias",
+            f"{BASE_URL}/permisos",
             headers={"X-Api-Key": API_KEY},
             params=parametros,
             timeout=TIMEOUT,
         )
         respuesta.raise_for_status()
     except requests.exceptions.ConnectionError as error:
-        raise CLIConnectionError("No hubo respuesta al solicitar materias") from error
+        raise CLIConnectionError("No hubo respuesta al solicitar permisos") from error
     except requests.exceptions.HTTPError as error:
-        raise CLIStatusCodeError("Error Status Code al solicitar materias: " + str(error)) from error
+        raise CLIStatusCodeError("Error Status Code al solicitar permisos: " + str(error)) from error
     except requests.exceptions.RequestException as error:
-        raise CLIRequestError("Error inesperado al solicitar materias") from error
+        raise CLIRequestError("Error inesperado al solicitar permisos") from error
     datos = respuesta.json()
     if "success" not in datos or datos["success"] is False or "result" not in datos:
         if "message" in datos:
-            raise CLIResponseError("Error al solicitar materias: " + datos["message"])
-        raise CLIResponseError("Error al solicitar materias")
+            raise CLIResponseError("Error al solicitar permisos: " + datos["message"])
+        raise CLIResponseError("Error al solicitar permisos")
     return datos["result"]

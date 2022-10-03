@@ -4,7 +4,6 @@ CLI Distritos App
 import rich
 import typer
 
-from common.authentication import authorization_header
 from common.exceptions import CLIAnyError
 from config.settings import LIMIT
 
@@ -22,7 +21,6 @@ def consultar(
     rich.print("Consultar distritos...")
     try:
         respuesta = get_distritos(
-            authorization_header=authorization_header(),
             limit=limit,
             offset=offset,
         )
@@ -39,4 +37,4 @@ def consultar(
             "SI" if registro["es_distrito_judicial"] else "NO",
         )
     console.print(table)
-    rich.print(f"Total: [green]{respuesta['total']}[/green] oficinas")
+    rich.print(f"Total: [green]{respuesta['total']}[/green] distritos")

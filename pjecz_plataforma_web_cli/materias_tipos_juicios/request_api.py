@@ -1,5 +1,5 @@
 """
-CLI Materias Request API
+CLI Materias Tipos de Juicios Request API
 """
 from typing import Any
 
@@ -9,31 +9,34 @@ from common.exceptions import CLIConnectionError, CLIRequestError, CLIResponseEr
 from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 
-def get_materias(
+def get_materias_tipos_juicios(
     limit: int = LIMIT,
+    materia_id: int = None,
     offset: int = 0,
 ) -> Any:
-    """Solicitar materias"""
+    """Solicitar materias tipos de juicios"""
     parametros = {"limit": limit}
+    if materia_id is not None:
+        parametros["materia_id"] = materia_id
     if offset > 0:
         parametros["offset"] = offset
     try:
         respuesta = requests.get(
-            f"{BASE_URL}/materias",
+            f"{BASE_URL}/materias_tipos_juicios",
             headers={"X-Api-Key": API_KEY},
             params=parametros,
             timeout=TIMEOUT,
         )
         respuesta.raise_for_status()
     except requests.exceptions.ConnectionError as error:
-        raise CLIConnectionError("No hubo respuesta al solicitar materias") from error
+        raise CLIConnectionError("No hubo respuesta al solicitar materias tipos de juicios") from error
     except requests.exceptions.HTTPError as error:
-        raise CLIStatusCodeError("Error Status Code al solicitar materias: " + str(error)) from error
+        raise CLIStatusCodeError("Error Status Code al solicitar materias tipos de juicios: " + str(error)) from error
     except requests.exceptions.RequestException as error:
-        raise CLIRequestError("Error inesperado al solicitar materias") from error
+        raise CLIRequestError("Error inesperado al solicitar materias tipos de juicios") from error
     datos = respuesta.json()
     if "success" not in datos or datos["success"] is False or "result" not in datos:
         if "message" in datos:
-            raise CLIResponseError("Error al solicitar materias: " + datos["message"])
-        raise CLIResponseError("Error al solicitar materias")
+            raise CLIResponseError("Error al solicitar materias tipos de juicios: " + datos["message"])
+        raise CLIResponseError("Error al solicitar materias tipos de juicios")
     return datos["result"]
