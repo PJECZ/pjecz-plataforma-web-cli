@@ -10,8 +10,8 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 
 def get_materias_tipos_juicios(
-    limit: int = LIMIT,
     materia_id: int = None,
+    limit: int = LIMIT,
     offset: int = 0,
 ) -> Any:
     """Solicitar materias tipos de juicios"""

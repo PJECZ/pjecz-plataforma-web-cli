@@ -12,8 +12,8 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 def get_oficinas(
     distrito_id: int = None,
     domicilio_id: int = None,
-    limit: int = LIMIT,
     puede_agendar_citas: bool = None,
+    limit: int = LIMIT,
     offset: int = 0,
 ) -> Any:
     """Solicitar oficinas"""
