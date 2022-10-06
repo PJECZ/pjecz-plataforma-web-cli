@@ -48,7 +48,7 @@ def consultar(
     console = rich.console.Console()
     table = rich.table.Table("ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Archivo")
     for registro in respuesta["items"]:
-        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z") # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
         table.add_row(
             str(registro["id"]),
             creado.strftime("%Y-%m-%d %H:%M:%S"),
