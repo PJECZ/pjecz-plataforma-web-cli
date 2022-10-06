@@ -10,6 +10,7 @@ from common.exceptions import CLIAnyError
 from config.settings import LIMIT
 
 from .request_api import get_listas_de_acuerdos, get_listas_de_acuerdos_sintetizar_por_creado
+from .send_messages import send_creadas
 
 app = typer.Typer()
 
@@ -105,3 +106,25 @@ def consultar_creadas(
         )
         contador += 1
     console.print(table)
+
+
+@app.command()
+def enviar_creadas(
+    creado: str,
+    email: str,
+    size: int = LIMIT,
+    test: bool = True,
+):
+    """Enviar listas de acuerdos sintetizados por creado"""
+    rich.print("Enviar listas de acuerdos sintetizados por creado")
+    try:
+        mensaje = send_creadas(
+            creado=creado,
+            email=email,
+            size=size,
+            test=test,
+        )
+    except CLIAnyError as error:
+        typer.secho(str(error), fg=typer.colors.RED)
+        raise typer.Exit()
+    rich.print(mensaje)
