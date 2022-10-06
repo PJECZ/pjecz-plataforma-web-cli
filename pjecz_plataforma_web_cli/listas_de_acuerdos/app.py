@@ -9,7 +9,7 @@ import typer
 from common.exceptions import CLIAnyError
 from config.settings import LIMIT
 
-from .request_api import get_listas_de_acuerdos
+from .request_api import get_listas_de_acuerdos, get_listas_de_acuerdos_sintetizar_por_creado
 
 app = typer.Typer()
 
@@ -59,3 +59,49 @@ def consultar(
         )
     console.print(table)
     rich.print(f"Total: [green]{respuesta['total']}[/green] listas de acuerdos")
+
+
+@app.command()
+def consultar_creadas(
+    creado: str,
+    distrito_id: int = None,
+    size: int = LIMIT,
+):
+    """Consultar listas de acuerdos sintetizados por creado"""
+    rich.print("Consultar listas de acuerdos sintetizados por creado")
+    try:
+        respuesta = get_listas_de_acuerdos_sintetizar_por_creado(
+            creado=creado,
+            distrito_id=distrito_id,
+            size=size,
+        )
+    except CLIAnyError as error:
+        typer.secho(str(error), fg=typer.colors.RED)
+        raise typer.Exit()
+    console = rich.console.Console()
+    table = rich.table.Table("A. Clave", "Distrito", "Autoridad", "ID", "Fecha", "Creado", "Archivo")
+    contador = 0
+    for registro in respuesta["items"]:
+        if registro["id"] == 0:
+            table.add_row(
+                registro["autoridad_clave"],
+                registro["distrito_nombre_corto"],
+                registro["autoridad_descripcion_corta"],
+                "ND",
+                "ND",
+                "ND",
+                "ND",
+            )
+            continue
+        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+        table.add_row(
+            registro["autoridad_clave"],
+            registro["distrito_nombre_corto"],
+            registro["autoridad_descripcion_corta"],
+            str(registro["id"]),
+            registro["fecha"],
+            creado.strftime("%Y-%m-%d %H:%M:%S"),
+            registro["archivo"],
+        )
+        contador += 1
+    console.print(table)
