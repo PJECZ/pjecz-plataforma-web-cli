@@ -15,6 +15,7 @@ from pjecz_plataforma_web_cli.inv_equipos.app import app as inv_equipos_app
 from pjecz_plataforma_web_cli.inv_marcas.app import app as inv_marcas_app
 from pjecz_plataforma_web_cli.inv_modelos.app import app as inv_modelos_app
 from pjecz_plataforma_web_cli.inv_redes.app import app as inv_redes_app
+from pjecz_plataforma_web_cli.listas_de_acuerdos.app import app as listas_de_acuerdos_app
 from pjecz_plataforma_web_cli.materias.app import app as materias_app
 from pjecz_plataforma_web_cli.materias_tipos_juicios.app import app as materias_tipos_juicios_app
 from pjecz_plataforma_web_cli.modulos.app import app as modulos_app
@@ -36,6 +37,7 @@ app.add_typer(inv_equipos_app, name="inv_equipos")
 app.add_typer(inv_marcas_app, name="inv_marcas")
 app.add_typer(inv_modelos_app, name="inv_modelos")
 app.add_typer(inv_redes_app, name="inv_redes")
+app.add_typer(listas_de_acuerdos_app, name="listas_de_acuerdos")
 app.add_typer(materias_app, name="materias")
 app.add_typer(materias_tipos_juicios_app, name="materias_tipos_juicios")
 app.add_typer(modulos_app, name="modulos")
