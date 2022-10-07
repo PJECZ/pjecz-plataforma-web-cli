@@ -17,7 +17,6 @@ def consultar(
     distrito_id: int = None,
     domicilio_id: int = None,
     limit: int = LIMIT,
-    puede_agendar_citas: bool = True,
     offset: int = 0,
 ):
     """Consultar oficinas"""
@@ -27,21 +26,19 @@ def consultar(
             distrito_id=distrito_id,
             domicilio_id=domicilio_id,
             limit=limit,
-            puede_agendar_citas=puede_agendar_citas,
             offset=offset,
         )
     except CLIAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Clave", "Distrito", "Descripcion", "P.A.C.", "Apertura", "Cierre", "L.P.")
+    table = rich.table.Table("ID", "Clave", "Distrito", "Descripcion", "Apertura", "Cierre", "L.P.")
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
             registro["clave"],
             registro["distrito_nombre_corto"],
             registro["descripcion_corta"],
-            "SI" if bool(registro["puede_agendar_citas"]) else "",
             registro["apertura"],
             registro["cierre"],
             str(registro["limite_personas"]),
