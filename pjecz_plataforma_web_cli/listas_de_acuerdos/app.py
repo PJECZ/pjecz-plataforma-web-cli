@@ -1,6 +1,7 @@
 """
 CLI Listas de Acuerdos App
 """
+import csv
 from datetime import datetime
 
 import rich
@@ -25,11 +26,14 @@ def consultar(
     fecha: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
+    guardar: bool = False,
     limit: int = LIMIT,
     offset: int = 0,
 ):
     """Consultar listas de acuerdos"""
     rich.print("Consultar listas de acuerdos...")
+
+    # Solicitar datos
     try:
         respuesta = get_listas_de_acuerdos(
             autoridad_id=autoridad_id,
@@ -46,8 +50,36 @@ def consultar(
     except CLIAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Encabezados
+    encabezados = ["ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Archivo"]
+
+    # Guardar datos en un archivo CSV
+    if guardar:
+        fecha_hora = datetime.now().strftime("%Y%m%d%H%M%S")
+        nombre_archivo_csv = f"listas_de_acuerdos_{fecha_hora}.csv"
+        with open(nombre_archivo_csv, "w", encoding="utf-8") as archivo:
+            escritor = csv.writer(archivo)
+            escritor.writerow(encabezados)
+            for registro in respuesta["items"]:
+                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f")
+                escritor.writerow(
+                    [
+                        registro["id"],
+                        creado.strftime("%Y-%m-%d %H:%M:%S"),
+                        registro["autoridad_clave"],
+                        registro["fecha"],
+                        registro["descripcion"],
+                        registro["archivo"],
+                    ]
+                )
+        rich.print(f"Datos guardados en el archivo {nombre_archivo_csv}")
+
+    # Mostrar la tabla
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Archivo")
+    table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
     for registro in respuesta["items"]:
         creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
         table.add_row(
@@ -59,6 +91,8 @@ def consultar(
             registro["archivo"],
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] listas de acuerdos")
 
 
