@@ -136,3 +136,5 @@ dmypy.json
 
 # No subir los datos guardados en archivos CSV
 *.csv
+*.ods
+*.xlsx

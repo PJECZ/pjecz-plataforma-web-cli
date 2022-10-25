@@ -12,7 +12,6 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 def get_oficinas(
     distrito_id: int = None,
     domicilio_id: int = None,
-    puede_agendar_citas: bool = None,
     limit: int = LIMIT,
     offset: int = 0,
 ) -> Any:
@@ -22,8 +21,6 @@ def get_oficinas(
         parametros["distrito_id"] = distrito_id
     if domicilio_id is not None:
         parametros["domicilio_id"] = domicilio_id
-    if puede_agendar_citas is not None:
-        parametros["puede_agendar_citas"] = puede_agendar_citas
     if offset > 0:
         parametros["offset"] = offset
     try:
