@@ -28,10 +28,11 @@ def consultar(
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Estado", "Municipio", "Calle", "No. Ext.", "No. Int.", "Colonia", "C.P.")
+    table = rich.table.Table("ID", "Edificio", "Estado", "Municipio", "Calle", "No. Ext.", "No. Int.", "Colonia", "C.P.")
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
+            registro["edificio"],
             registro["estado"],
             registro["municipio"],
             registro["calle"],

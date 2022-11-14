@@ -29,9 +29,9 @@ def get_inv_equipos(
     if creado is not None:
         parametros["creado"] = creado
     if creado_desde is not None:
-        parametros["creado"] = creado_desde
+        parametros["creado_desde"] = creado_desde
     if creado_hasta is not None:
-        parametros["creado"] = creado_hasta
+        parametros["creado_hasta"] = creado_hasta
     if fecha_fabricacion_desde is not None:
         parametros["fecha_fabricacion"] = fecha_fabricacion_desde
     if fecha_fabricacion_hasta is not None:
