@@ -19,12 +19,12 @@ app = typer.Typer()
 def consultar(
     autoridad_id: int = None,
     autoridad_clave: str = None,
-    limit: int = LIMIT,
-    guardar: bool = False,
     oficina_id: int = None,
     oficina_clave: str = None,
     offset: int = 0,
     workspace: str = None,
+    limit: int = LIMIT,
+    guardar: bool = False,
 ):
     """Consultar usuarios"""
     rich.print("Consultar usuarios...")
