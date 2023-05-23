@@ -10,11 +10,20 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 
 def get_distritos(
+    es_distrito: bool = None,
+    es_distrito_judicial: bool = None,
+    es_jurisdiccional: bool = None,
     limit: int = LIMIT,
     offset: int = 0,
 ) -> Any:
     """Solicitar distritos"""
     parametros = {"limit": limit}
+    if es_distrito is not None:
+        parametros["es_distrito"] = es_distrito
+    if es_distrito_judicial is not None:
+        parametros["es_distrito_judicial"] = es_distrito_judicial
+    if es_jurisdiccional is not None:
+        parametros["es_jurisdiccional"] = es_jurisdiccional
     if offset > 0:
         parametros["offset"] = offset
     try:

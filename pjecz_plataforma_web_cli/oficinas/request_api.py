@@ -11,7 +11,9 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 def get_oficinas(
     distrito_id: int = None,
+    distrito_clave: str = None,
     domicilio_id: int = None,
+    es_jurisdiccional: bool = None,
     limit: int = LIMIT,
     offset: int = 0,
 ) -> Any:
@@ -19,8 +21,12 @@ def get_oficinas(
     parametros = {"limit": limit}
     if distrito_id is not None:
         parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
     if domicilio_id is not None:
         parametros["domicilio_id"] = domicilio_id
+    if es_jurisdiccional is not None:
+        parametros["es_jurisdiccional"] = es_jurisdiccional
     if offset > 0:
         parametros["offset"] = offset
     try:
