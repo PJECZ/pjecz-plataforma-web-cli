@@ -42,16 +42,18 @@ def consultar(
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Clave", "Descripcion", "Distrito", "Materia", "Es J.", "Es N.", "Organo J.")
+    table = rich.table.Table("ID", "Clave", "Desc. corta", "Distrito", "CEMASC", "Glosas", "Def.", "Es J.", "Es N.", "O.J.")
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
             registro["clave"],
             registro["descripcion_corta"],
             registro["distrito_nombre_corto"],
-            registro["materia_nombre"],
-            "SI" if registro["es_jurisdiccional"] else "NO",
-            "SI" if registro["es_notaria"] else "NO",
+            "SI" if registro["es_cemasc"] else "",
+            "SI" if registro["es_creador_glosas"] else "",
+            "SI" if registro["es_defensoria"] else "",
+            "SI" if registro["es_jurisdiccional"] else "",
+            "SI" if registro["es_notaria"] else "",
             registro["organo_jurisdiccional"],
         )
     console.print(table)
