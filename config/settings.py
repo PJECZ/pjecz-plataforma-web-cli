@@ -10,7 +10,7 @@ load_dotenv()
 
 # Host and base URL
 HOST = os.getenv("HOST", "")
-BASE_URL = f"{HOST}/v1"
+BASE_URL = HOST + "/v3"
 
 # Default limit and timeout in seconds
 API_KEY = os.getenv("API_KEY", "")

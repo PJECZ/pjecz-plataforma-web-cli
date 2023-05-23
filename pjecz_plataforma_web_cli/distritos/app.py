@@ -14,6 +14,9 @@ app = typer.Typer()
 
 @app.command()
 def consultar(
+    es_distrito: bool = None,
+    es_distrito_judicial: bool = None,
+    es_jurisdiccional: bool = None,
     limit: int = LIMIT,
     offset: int = 0,
 ):
@@ -21,6 +24,9 @@ def consultar(
     rich.print("Consultar distritos...")
     try:
         respuesta = get_distritos(
+            es_distrito=es_distrito,
+            es_distrito_judicial=es_distrito_judicial,
+            es_jurisdiccional=es_jurisdiccional,
             limit=limit,
             offset=offset,
         )

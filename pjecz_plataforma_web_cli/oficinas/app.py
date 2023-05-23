@@ -15,7 +15,9 @@ app = typer.Typer()
 @app.command()
 def consultar(
     distrito_id: int = None,
+    distrito_clave: str = None,
     domicilio_id: int = None,
+    es_jurisdiccional: bool = None,
     limit: int = LIMIT,
     offset: int = 0,
 ):
@@ -24,7 +26,9 @@ def consultar(
     try:
         respuesta = get_oficinas(
             distrito_id=distrito_id,
+            distrito_clave=distrito_clave,
             domicilio_id=domicilio_id,
+            es_jurisdiccional=es_jurisdiccional,
             limit=limit,
             offset=offset,
         )

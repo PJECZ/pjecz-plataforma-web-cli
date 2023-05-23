@@ -11,10 +11,12 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 def get_autoridades(
     distrito_id: int = None,
+    distrito_clave: str = None,
+    es_cemasc: bool = None,
+    es_creador_glosas: bool = None,
+    es_defensoria: bool = None,
     es_jurisdiccional: bool = None,
     es_notaria: bool = None,
-    materia_id: int = None,
-    organo_jurisdiccional: str = None,
     limit: int = LIMIT,
     offset: int = 0,
 ) -> Any:
@@ -22,14 +24,18 @@ def get_autoridades(
     parametros = {"limit": limit}
     if distrito_id is not None:
         parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
+    if es_cemasc is not None:
+        parametros["es_cemasc"] = es_cemasc
+    if es_creador_glosas is not None:
+        parametros["es_creador_glosas"] = es_creador_glosas
+    if es_defensoria is not None:
+        parametros["es_defensoria"] = es_defensoria
     if es_jurisdiccional is not None:
         parametros["es_jurisdiccional"] = es_jurisdiccional
     if es_notaria is not None:
         parametros["es_notaria"] = es_notaria
-    if materia_id is not None:
-        parametros["materia_id"] = materia_id
-    if organo_jurisdiccional is not None:
-        parametros["organo_jurisdiccional"] = organo_jurisdiccional
     if offset > 0:
         parametros["offset"] = offset
     try:

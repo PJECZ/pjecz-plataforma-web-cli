@@ -15,24 +15,28 @@ app = typer.Typer()
 @app.command()
 def consultar(
     distrito_id: int = None,
+    distrito_clave: str = None,
+    es_cemasc: bool = None,
+    es_creador_glosas: bool = None,
+    es_defensoria: bool = None,
     es_jurisdiccional: bool = None,
     es_notaria: bool = None,
     limit: int = LIMIT,
-    materia_id: int = None,
     offset: int = 0,
-    organo_jurisdiccional: str = None,
 ):
     """Consultar autoridades"""
     rich.print("Consultar autoridades...")
     try:
         respuesta = get_autoridades(
             distrito_id=distrito_id,
+            distrito_clave=distrito_clave,
+            es_cemasc=es_cemasc,
+            es_creador_glosas=es_creador_glosas,
+            es_defensoria=es_defensoria,
             es_jurisdiccional=es_jurisdiccional,
             es_notaria=es_notaria,
             limit=limit,
-            materia_id=materia_id,
             offset=offset,
-            organo_jurisdiccional=organo_jurisdiccional,
         )
     except CLIAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
