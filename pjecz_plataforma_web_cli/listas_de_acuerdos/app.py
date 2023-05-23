@@ -13,6 +13,8 @@ from config.settings import LIMIT
 from .request_api import get_listas_de_acuerdos, get_listas_de_acuerdos_sintetizar_por_creado
 from .send_messages import send_creadas
 
+encabezados = ["ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Archivo"]
+
 app = typer.Typer()
 
 
@@ -26,7 +28,6 @@ def consultar(
     fecha: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
-    guardar: bool = False,
     limit: int = LIMIT,
     offset: int = 0,
 ):
@@ -51,30 +52,6 @@ def consultar(
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
-    # Encabezados
-    encabezados = ["ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Archivo"]
-
-    # Guardar datos en un archivo CSV
-    if guardar:
-        fecha_hora = datetime.now().strftime("%Y%m%d%H%M%S")
-        nombre_archivo_csv = f"listas_de_acuerdos_{fecha_hora}.csv"
-        with open(nombre_archivo_csv, "w", encoding="utf-8") as archivo:
-            escritor = csv.writer(archivo)
-            escritor.writerow(encabezados)
-            for registro in respuesta["items"]:
-                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f")
-                escritor.writerow(
-                    [
-                        registro["id"],
-                        creado.strftime("%Y-%m-%d %H:%M:%S"),
-                        registro["autoridad_clave"],
-                        registro["fecha"],
-                        registro["descripcion"],
-                        registro["archivo"],
-                    ]
-                )
-        rich.print(f"Datos guardados en el archivo {nombre_archivo_csv}")
-
     # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table()
@@ -94,6 +71,49 @@ def consultar(
 
     # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] listas de acuerdos")
+
+
+@app.command()
+def guardar():
+    """Guardar listas de acuerdos en un archivo CSV"""
+    rich.print("Guardar listas de acuerdos...")
+
+    # Definir el nombre del archivo CSV
+    fecha_hora = datetime.now().strftime("%Y%m%d%H%M%S")
+    nombre_archivo_csv = f"listas_de_acuerdos_{fecha_hora}.csv"
+
+    # Guardar los datos en un archivo CSV haciendo bucle de consultas a la API
+    with open(nombre_archivo_csv, "w", encoding="utf-8") as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerow(encabezados)
+        offset = 0
+        while True:
+            try:
+                respuesta = get_listas_de_acuerdos(
+                    limit=LIMIT,
+                    offset=offset,
+                )
+            except CLIAnyError as error:
+                typer.secho(str(error), fg=typer.colors.RED)
+                raise typer.Exit()
+            for registro in respuesta["items"]:
+                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+                escritor.writerow(
+                    [
+                        registro["id"],
+                        creado.strftime("%Y-%m-%d %H:%M:%S"),
+                        registro["autoridad_clave"],
+                        registro["fecha"],
+                        registro["descripcion"],
+                        registro["archivo"],
+                    ]
+                )
+            offset += LIMIT
+            if offset >= respuesta["total"]:
+                break
+
+    # Mensaje de termino
+    rich.print(f"Total: [green]{respuesta['total']}[/green] listas de acuerdos guardados en el archivo {nombre_archivo_csv}")
 
 
 @app.command()
