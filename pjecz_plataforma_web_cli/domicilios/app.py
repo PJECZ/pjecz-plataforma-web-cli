@@ -35,9 +35,6 @@ def consultar(
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
-    # Encabezados
-    encabezados = ["ID", "Edificio", "Estado", "Municipio", "Calle", "No. Ext.", "No. Int.", "Colonia", "C.P."]
-
     # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table()
