@@ -12,6 +12,8 @@ from config.settings import LIMIT
 
 from .request_api import get_edictos
 
+encabezados = ["ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Expediente", "No. Pub.", "Archivo"]
+
 app = typer.Typer()
 
 
@@ -22,7 +24,6 @@ def consultar(
     fecha: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
-    guardar: bool = False,
     limit: int = LIMIT,
     offset: int = 0,
 ):
@@ -44,38 +45,16 @@ def consultar(
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
-    # Encabezados
-    encabezados = ["ID", "Autoridad", "Fecha", "Descripcion", "Expediente", "No. Pub.", "Archivo"]
-
-    # Guardar datos en un archivo CSV
-    if guardar:
-        fecha_hora = datetime.now().strftime("%Y%m%d%H%M%S")
-        nombre_archivo_csv = f"inv_equipos_{fecha_hora}.csv"
-        with open(nombre_archivo_csv, "w", encoding="utf-8") as archivo:
-            escritor = csv.writer(archivo)
-            escritor.writerow(encabezados)
-            for registro in respuesta["items"]:
-                escritor.writerow(
-                    [
-                        registro["id"],
-                        registro["autoridad_clave"],
-                        registro["fecha"],
-                        registro["descripcion"],
-                        registro["expediente"],
-                        registro["numero_publicacion"],
-                        registro["archivo"],
-                    ]
-                )
-        rich.print(f"Datos guardados en el archivo {nombre_archivo_csv}")
-
     # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table()
     for enca in encabezados:
         table.add_column(enca)
     for registro in respuesta["items"]:
+        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
         table.add_row(
             str(registro["id"]),
+            creado.strftime("%Y-%m-%d %H:%M:%S"),
             registro["autoridad_clave"],
             registro["fecha"],
             registro["descripcion"],
@@ -87,3 +66,59 @@ def consultar(
 
     # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] edictos")
+
+
+@app.command()
+def guardar(
+    autoridad_id: int = None,
+    autoridad_clave: str = None,
+    fecha: str = None,
+    fecha_desde: str = None,
+    fecha_hasta: str = None,
+):
+    """Guardar edictos en un archivo CSV"""
+    rich.print("Guardar edictos...")
+
+    # Definir el nombre del archivo CSV
+    fecha_hora = datetime.now().strftime("%Y%m%d%H%M%S")
+    nombre_archivo_csv = f"edictos_{fecha_hora}.csv"
+
+    # Guardar los datos en un archivo CSV haciendo bucle de consultas a la API
+    with open(nombre_archivo_csv, "w", encoding="utf-8") as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerow(encabezados)
+        offset = 0
+        while True:
+            try:
+                respuesta = get_edictos(
+                    autoridad_id=autoridad_id,
+                    autoridad_clave=autoridad_clave,
+                    fecha=fecha,
+                    fecha_desde=fecha_desde,
+                    fecha_hasta=fecha_hasta,
+                    limit=LIMIT,
+                    offset=offset,
+                )
+            except CLIAnyError as error:
+                typer.secho(str(error), fg=typer.colors.RED)
+                raise typer.Exit()
+            for registro in respuesta["items"]:
+                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+                escritor.writerow(
+                    [
+                        registro["id"],
+                        creado.strftime("%Y-%m-%d %H:%M:%S"),
+                        registro["autoridad_clave"],
+                        registro["fecha"],
+                        registro["descripcion"],
+                        registro["expediente"],
+                        registro["numero_publicacion"],
+                        registro["archivo"],
+                    ]
+                )
+            offset += LIMIT
+            if offset >= respuesta["total"]:
+                break
+
+    # Mensaje de termino
+    rich.print(f"Total: [green]{respuesta['total']}[/green] edictos guardados en el archivo {nombre_archivo_csv}")

@@ -13,6 +13,8 @@ def get_inv_equipos(
     creado: str = None,
     creado_desde: str = None,
     creado_hasta: str = None,
+    distrito_id: int = None,
+    distrito_clave: str = None,
     fecha_fabricacion_desde: str = None,
     fecha_fabricacion_hasta: str = None,
     inv_custodia_id: int = None,
@@ -32,6 +34,10 @@ def get_inv_equipos(
         parametros["creado_desde"] = creado_desde
     if creado_hasta is not None:
         parametros["creado_hasta"] = creado_hasta
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
     if fecha_fabricacion_desde is not None:
         parametros["fecha_fabricacion"] = fecha_fabricacion_desde
     if fecha_fabricacion_hasta is not None:

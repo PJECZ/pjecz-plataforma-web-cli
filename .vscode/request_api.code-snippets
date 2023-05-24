@@ -1,5 +1,5 @@
 {
-    "CLI request_apy.py": {
+    "CLI request_api.py": {
         "scope": "python",
         "prefix": "clirequestapi",
         "description": "Contenido de request_api.py",
