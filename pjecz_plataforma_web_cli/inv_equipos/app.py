@@ -12,7 +12,7 @@ from config.settings import LIMIT
 
 from .request_api import get_inv_equipos
 
-encabezados = ["ID", "Creado", "Custodia", "Marca", "Modelo", "Red", "F. Fab.", "No. Serie", "No. Inv.", "Tipo", "D. IP", "Mac Address"]
+encabezados = ["ID", "Custodia", "Usuario e-mail", "Nombre completo", "Distrito", "Oficina", "Marca", "Modelo", "Red", "F. Fab.", "No. Serie", "No. Inv.", "Tipo", "D. IP", "Mac Address", "Disco Duro", "Memoria", "Procesador"]
 
 app = typer.Typer()
 
@@ -22,6 +22,8 @@ def consultar(
     creado: str = None,
     creado_desde: str = None,
     creado_hasta: str = None,
+    distrito_id: int = None,
+    distrito_clave: str = None,
     fecha_fabricacion_desde: str = None,
     fecha_fabricacion_hasta: str = None,
     inv_custodia_id: int = None,
@@ -42,6 +44,8 @@ def consultar(
             creado=creado,
             creado_desde=creado_desde,
             creado_hasta=creado_hasta,
+            distrito_id=distrito_id,
+            distrito_clave=distrito_clave,
             fecha_fabricacion_desde=fecha_fabricacion_desde,
             fecha_fabricacion_hasta=fecha_fabricacion_hasta,
             inv_custodia_id=inv_custodia_id,
@@ -63,11 +67,13 @@ def consultar(
     for enca in encabezados:
         table.add_column(enca)
     for registro in respuesta["items"]:
-        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f")
         table.add_row(
             str(registro["id"]),
-            creado.strftime("%Y-%m-%d %H:%M:%S"),
             str(registro["inv_custodia_id"]),
+            registro["usuario_email"],
+            registro["inv_custodia_nombre_completo"],
+            registro["distrito_clave"],
+            registro["oficina_clave"],
             registro["inv_marca_nombre"],
             registro["inv_modelo_descripcion"],
             registro["inv_red_nombre"],
@@ -77,6 +83,9 @@ def consultar(
             registro["tipo"],
             registro["direccion_ip"],
             registro["direccion_mac"],
+            registro["disco_duro"],
+            registro["memoria_ram"],
+            registro["procesador"],
         )
     console.print(table)
 
@@ -131,12 +140,14 @@ def guardar(
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:
-                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f")
                 escritor.writerow(
                     [
                         registro["id"],
-                        creado.strftime("%Y-%m-%d %H:%M:%S"),
                         registro["inv_custodia_id"],
+                        registro["usuario_email"],
+                        registro["inv_custodia_nombre_completo"],
+                        registro["distrito_clave"],
+                        registro["oficina_clave"],
                         registro["inv_marca_nombre"],
                         registro["inv_modelo_descripcion"],
                         registro["inv_red_nombre"],
@@ -146,6 +157,9 @@ def guardar(
                         registro["tipo"],
                         registro["direccion_ip"],
                         registro["direccion_mac"],
+                        registro["disco_duro"],
+                        registro["memoria_ram"],
+                        registro["procesador"],
                     ]
                 )
             offset += LIMIT

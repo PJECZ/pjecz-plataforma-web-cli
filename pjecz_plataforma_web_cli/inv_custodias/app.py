@@ -12,13 +12,15 @@ from config.settings import LIMIT
 
 from .request_api import get_inv_custodias
 
-encabezados = ["ID", "Creado", "Usuario", "Nombre completo"]
+encabezados = ["ID", "Usuario e-mail", "Nombre completo", "Distrito", "Oficina"]
 
 app = typer.Typer()
 
 
 @app.command()
 def consultar(
+    distrito_id: int = None,
+    distrito_clave: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
     usuario_id: int = None,
@@ -32,6 +34,8 @@ def consultar(
     # Solicitar datos
     try:
         respuesta = get_inv_custodias(
+            distrito_id=distrito_id,
+            distrito_clave=distrito_clave,
             fecha_desde=fecha_desde,
             fecha_hasta=fecha_hasta,
             usuario_id=usuario_id,
@@ -49,12 +53,12 @@ def consultar(
     for enca in encabezados:
         table.add_column(enca)
     for registro in respuesta["items"]:
-        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f")
         table.add_row(
             str(registro["id"]),
-            creado.strftime("%Y-%m-%d %H:%M:%S"),
             registro["usuario_email"],
             registro["nombre_completo"],
+            registro["distrito_clave"],
+            registro["oficina_clave"],
         )
     console.print(table)
 
@@ -64,6 +68,8 @@ def consultar(
 
 @app.command()
 def guardar(
+    distrito_id: int = None,
+    distrito_clave: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
     usuario_id: int = None,
@@ -84,6 +90,8 @@ def guardar(
         while True:
             try:
                 respuesta = get_inv_custodias(
+                    distrito_id=distrito_id,
+                    distrito_clave=distrito_clave,
                     fecha_desde=fecha_desde,
                     fecha_hasta=fecha_hasta,
                     usuario_id=usuario_id,
@@ -95,13 +103,13 @@ def guardar(
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:
-                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f")
                 escritor.writerow(
                     [
                         registro["id"],
-                        creado.strftime("%Y-%m-%d %H:%M:%S"),
                         registro["usuario_email"],
                         registro["nombre_completo"],
+                        registro["distrito_clave"],
+                        registro["oficina_clave"],
                     ]
                 )
             offset += LIMIT

@@ -10,6 +10,8 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 
 def get_inv_custodias(
+    distrito_id: int = None,
+    distrito_clave: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
     usuario_id: int = None,
@@ -19,6 +21,10 @@ def get_inv_custodias(
 ) -> Any:
     """Solicitar custodias"""
     parametros = {"limit": limit}
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
     if fecha_desde is not None:
         parametros["fecha"] = fecha_desde
     if fecha_hasta is not None:
