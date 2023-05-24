@@ -12,7 +12,7 @@ from config.settings import LIMIT
 
 from .request_api import get_inv_custodias
 
-encabezados = ["ID", "Usuario e-mail", "Nombre completo", "Distrito", "Oficina"]
+encabezados = ["ID", "Usuario e-mail", "Nombre completo", "Distrito", "Edificio", "Oficina"]
 
 app = typer.Typer()
 
@@ -58,6 +58,7 @@ def consultar(
             registro["usuario_email"],
             registro["nombre_completo"],
             registro["distrito_clave"],
+            registro["domicilio_edificio"],
             registro["oficina_clave"],
         )
     console.print(table)
@@ -109,6 +110,7 @@ def guardar(
                         registro["usuario_email"],
                         registro["nombre_completo"],
                         registro["distrito_clave"],
+                        registro["domicilio_edificio"],
                         registro["oficina_clave"],
                     ]
                 )

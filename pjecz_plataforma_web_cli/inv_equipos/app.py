@@ -12,7 +12,7 @@ from config.settings import LIMIT
 
 from .request_api import get_inv_equipos
 
-encabezados = ["ID", "Custodia", "Usuario e-mail", "Nombre completo", "Distrito", "Oficina", "Marca", "Modelo", "Red", "F. Fab.", "No. Serie", "No. Inv.", "Tipo", "D. IP", "Mac Address", "Disco Duro", "Memoria", "Procesador"]
+encabezados = ["ID", "Custodia", "Usuario e-mail", "Nombre completo", "Distrito", "Edificio", "Oficina", "Marca", "Modelo", "Red", "F. Fab.", "No. Serie", "No. Inv.", "Tipo", "D. IP", "Mac Address", "Disco Duro", "Memoria", "Procesador"]
 
 app = typer.Typer()
 
@@ -73,6 +73,7 @@ def consultar(
             registro["usuario_email"],
             registro["inv_custodia_nombre_completo"],
             registro["distrito_clave"],
+            registro["domicilio_edificio"],
             registro["oficina_clave"],
             registro["inv_marca_nombre"],
             registro["inv_modelo_descripcion"],
@@ -147,6 +148,7 @@ def guardar(
                         registro["usuario_email"],
                         registro["inv_custodia_nombre_completo"],
                         registro["distrito_clave"],
+                        registro["domicilio_edificio"],
                         registro["oficina_clave"],
                         registro["inv_marca_nombre"],
                         registro["inv_modelo_descripcion"],
