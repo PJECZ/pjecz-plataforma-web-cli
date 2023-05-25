@@ -3,12 +3,13 @@ CLI Inv Equipos App
 """
 import csv
 from datetime import datetime
+import time
 
 import rich
 import typer
 
 from common.exceptions import CLIAnyError
-from config.settings import LIMIT
+from config.settings import LIMIT, SLEEP
 
 from .request_api import get_inv_equipos
 
@@ -167,6 +168,8 @@ def guardar(
             offset += LIMIT
             if offset >= respuesta["total"]:
                 break
+            rich.print(f"Van [green]{offset}[/green] equipos...")
+            time.sleep(SLEEP)
 
     # Mensaje de termino
     rich.print(f"Total: [green]{respuesta['total']}[/green] equipos guardados en el archivo {nombre_archivo_csv}")
