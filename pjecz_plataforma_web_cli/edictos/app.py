@@ -3,12 +3,13 @@ CLI Edictos App
 """
 import csv
 from datetime import datetime
+import time
 
 import rich
 import typer
 
 from common.exceptions import CLIAnyError
-from config.settings import LIMIT
+from config.settings import LIMIT, SLEEP
 
 from .request_api import get_edictos
 
@@ -119,6 +120,8 @@ def guardar(
             offset += LIMIT
             if offset >= respuesta["total"]:
                 break
+            rich.print(f"Van [green]{offset}[/green] edictos...")
+            time.sleep(SLEEP)
 
     # Mensaje de termino
     rich.print(f"Total: [green]{respuesta['total']}[/green] edictos guardados en el archivo {nombre_archivo_csv}")

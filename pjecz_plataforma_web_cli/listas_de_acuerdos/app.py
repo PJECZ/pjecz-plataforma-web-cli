@@ -3,12 +3,13 @@ CLI Listas de Acuerdos App
 """
 import csv
 from datetime import datetime
+import time
 
 import rich
 import typer
 
 from common.exceptions import CLIAnyError
-from config.settings import LIMIT
+from config.settings import LIMIT, SLEEP
 
 from .request_api import get_listas_de_acuerdos, get_listas_de_acuerdos_sintetizar_por_creado
 from .send_messages import send_creadas
@@ -111,6 +112,8 @@ def guardar():
             offset += LIMIT
             if offset >= respuesta["total"]:
                 break
+            rich.print(f"Van [green]{offset}[/green] listas de acuerdos...")
+            time.sleep(SLEEP)
 
     # Mensaje de termino
     rich.print(f"Total: [green]{respuesta['total']}[/green] listas de acuerdos guardados en el archivo {nombre_archivo_csv}")

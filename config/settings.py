@@ -16,6 +16,7 @@ BASE_URL = HOST + "/v3"
 API_KEY = os.getenv("API_KEY", "")
 LIMIT = int(os.getenv("LIMIT", "40"))
 TIMEOUT = int(os.getenv("TIMEOUT", "12"))
+SLEEP = int(os.getenv("SLEEP", "4"))
 
 # SendGrid
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
