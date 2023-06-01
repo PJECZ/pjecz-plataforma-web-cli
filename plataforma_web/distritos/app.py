@@ -49,7 +49,7 @@ def consultar(
         table.add_column(enca)
     for registro in respuesta["items"]:
         table.add_row(
-            registro["id"],
+            str(registro["id"]),
             registro["clave"],
             registro["nombre"],
             registro["nombre_corto"],
