@@ -25,6 +25,7 @@ from plataforma_web.permisos.app import app as permisos_app
 from plataforma_web.roles.app import app as roles_app
 from plataforma_web.sentencias.app import app as sentencias_app
 from plataforma_web.siga_salas.app import app as siga_salas_app
+from plataforma_web.siga_grabaciones.app import app as siga_grabaciones_app
 from plataforma_web.usuarios.app import app as usuarios_app
 
 app = typer.Typer()
@@ -50,6 +51,7 @@ app.add_typer(permisos_app, name="permisos")
 app.add_typer(roles_app, name="roles")
 app.add_typer(sentencias_app, name="sentencias")
 app.add_typer(siga_salas_app, name="siga_salas")
+app.add_typer(siga_grabaciones_app, name="siga_grabaciones")
 app.add_typer(usuarios_app, name="usuarios")
 
 if __name__ == "__main__":

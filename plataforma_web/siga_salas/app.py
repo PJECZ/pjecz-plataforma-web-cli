@@ -1,9 +1,6 @@
 """
 CLI SIGA Salas App
 """
-import csv
-from datetime import datetime
-
 import rich
 import typer
 
