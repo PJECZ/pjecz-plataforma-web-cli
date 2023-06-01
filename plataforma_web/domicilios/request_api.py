@@ -10,11 +10,17 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 
 def get_domicilios(
+    distrito_id: int = None,
+    distrito_clave: str = None,
     limit: int = LIMIT,
     offset: int = 0,
 ) -> Any:
     """Solicitar domicilios"""
     parametros = {"limit": limit}
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
     if offset > 0:
         parametros["offset"] = offset
     try:

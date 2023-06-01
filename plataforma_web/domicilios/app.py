@@ -13,7 +13,7 @@ from config.settings import LIMIT, SLEEP
 
 from .request_api import get_domicilios
 
-encabezados = ["ID", "Edificio", "Estado", "Municipio", "Calle", "No. Ext.", "No. Int.", "Colonia", "C.P."]
+encabezados = ["ID", "Distrito", "Edificio", "Calle", "No. Ext.", "No. Int.", "Colonia", "Municipio", "C.P."]
 
 app = typer.Typer()
 
@@ -44,13 +44,13 @@ def consultar(
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
+            registro["distrito_clave"],
             registro["edificio"],
-            registro["estado"],
-            registro["municipio"],
             registro["calle"],
             registro["num_ext"],
             registro["num_int"],
             registro["colonia"],
+            registro["municipio"],
             str(registro["cp"]),
         )
     console.print(table)
@@ -86,13 +86,13 @@ def guardar():
                 escritor.writerow(
                     [
                         registro["id"],
+                        registro["distrito_clave"],
                         registro["edificio"],
-                        registro["estado"],
-                        registro["municipio"],
                         registro["calle"],
                         registro["num_ext"],
                         registro["num_int"],
                         registro["colonia"],
+                        registro["municipio"],
                         registro["cp"],
                     ]
                 )
