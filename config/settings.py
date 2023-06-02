@@ -25,3 +25,6 @@ SENDGRID_FROM_EMAIL = os.getenv("SENDGRID_FROM_EMAIL", "")
 # Huso horario local
 LOCAL_HUSO_HORARIO = pytz.timezone("America/Mexico_City")
 SERVIDOR_HUSO_HORARIO = pytz.utc
+
+# SIGA Justicia Ruta
+SIGA_JUSTICIA_RUTA = os.getenv("SIGA_JUSTICIA_RUTA", "")
