@@ -54,8 +54,8 @@ def consultar(
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
-            registro["distrito_nombre_corto"],
-            registro["autoridad_descripcion_corta"],
+            registro["distrito_clave"],
+            registro["autoridad_clave"],
             registro["oficina_clave"],
             registro["email"],
             registro["nombres"],
@@ -107,8 +107,8 @@ def guardar(
                 escritor.writerow(
                     [
                         registro["id"],
-                        registro["distrito_nombre_corto"],
-                        registro["autoridad_descripcion_corta"],
+                        registro["distrito_clave"],
+                        registro["autoridad_clave"],
                         registro["oficina_clave"],
                         registro["email"],
                         registro["nombres"],
