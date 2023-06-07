@@ -14,17 +14,19 @@ from config.settings import LIMIT, SIGA_JUSTICIA_RUTA
 
 from .request_api import get_siga_grabaciones, post_siga_grabacion
 
-encabezados = ["ID", "Inicio", "Sala", "Autoridad", "Expediente", "Duración", "Tamaño", "Estado"]
+encabezados = ["ID", "Inicio", "Sala", "Autoridad", "Expediente", "Duración", "Tamaño"]
 
 app = typer.Typer()
 
 
 @app.command()
 def consultar(
-    distrito_id: int = None,
-    distrito_clave: str = None,
     autoridad_id: int = None,
     autoridad_clave: str = None,
+    distrito_id: int = None,
+    distrito_clave: str = None,
+    materia_id: int = None,
+    materia_clave: str = None,
     siga_sala_id: int = None,
     siga_sala_clave: str = None,
     limit: int = LIMIT,
@@ -36,10 +38,12 @@ def consultar(
     # Solicitar datos
     try:
         respuesta = get_siga_grabaciones(
-            distrito_id=distrito_id,
-            distrito_clave=distrito_clave,
             autoridad_id=autoridad_id,
             autoridad_clave=autoridad_clave,
+            distrito_id=distrito_id,
+            distrito_clave=distrito_clave,
+            materia_id=materia_id,
+            materia_clave=materia_clave,
             siga_sala_id=siga_sala_id,
             siga_sala_clave=siga_sala_clave,
             limit=limit,
@@ -57,11 +61,8 @@ def consultar(
     for registro in respuesta["items"]:
         inicio = datetime.strptime(registro["inicio"], "%Y-%m-%dT%H:%M:%S")
         duracion = timedelta(seconds=registro["duracion"])
-        duracion_str = str(duracion)
+        duracion_str = str(duracion).split(".")[0]
         tamanio = f"{registro['tamanio'] / (1024 * 1024):0.2f} MB"
-        estado = registro["estado"]
-        if estado == "VALIDO":
-            estado = f"[cyan]{estado}[/cyan]"
         table.add_row(
             str(registro["id"]),
             inicio.strftime("%Y-%m-%d %H:%M:%S"),
@@ -70,7 +71,6 @@ def consultar(
             registro["expediente"],
             duracion_str,
             tamanio,
-            estado,
         )
     console.print(table)
 

@@ -13,7 +13,6 @@ def get_siga_salas(
     distrito_id: int = None,
     distrito_clave: str = None,
     domicilio_id: int = None,
-    estado: str = None,
     limit: int = LIMIT,
     offset: int = 0,
 ) -> Any:
@@ -25,8 +24,6 @@ def get_siga_salas(
         parametros["distrito_clave"] = distrito_clave
     if domicilio_id is not None:
         parametros["domicilio_id"] = domicilio_id
-    if estado is not None:
-        parametros["estado"] = estado
     if offset > 0:
         parametros["offset"] = offset
     try:

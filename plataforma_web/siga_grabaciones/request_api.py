@@ -11,10 +11,12 @@ from config.settings import API_KEY, BASE_URL, LIMIT, TIMEOUT
 
 
 def get_siga_grabaciones(
-    distrito_id: int = None,
-    distrito_clave: str = None,
     autoridad_id: int = None,
     autoridad_clave: str = None,
+    distrito_id: int = None,
+    distrito_clave: str = None,
+    materia_id: int = None,
+    materia_clave: str = None,
     siga_sala_id: int = None,
     siga_sala_clave: str = None,
     limit: int = LIMIT,
@@ -22,20 +24,24 @@ def get_siga_grabaciones(
 ) -> Any:
     """Solicitar grabaciones"""
     parametros = {"limit": limit}
-    if distrito_id is not None:
-        parametros["distrito_id"] = distrito_id
-    if distrito_clave is not None:
-        parametros["distrito_clave"] = distrito_clave
+    if offset > 0:
+        parametros["offset"] = offset
     if autoridad_id is not None:
         parametros["autoridad_id"] = autoridad_id
     if autoridad_clave is not None:
         parametros["autoridad_clave"] = autoridad_clave
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
+    if materia_id is not None:
+        parametros["materia_id"] = materia_id
+    if materia_clave is not None:
+        parametros["materia_clave"] = materia_clave
     if siga_sala_id is not None:
         parametros["siga_sala_id"] = siga_sala_id
     if siga_sala_clave is not None:
         parametros["siga_sala_clave"] = siga_sala_clave
-    if offset > 0:
-        parametros["offset"] = offset
     try:
         respuesta = requests.get(
             f"{BASE_URL}/siga_grabaciones",
