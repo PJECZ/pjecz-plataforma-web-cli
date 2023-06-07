@@ -12,7 +12,7 @@ import typer
 from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SIGA_JUSTICIA_RUTA
 
-from .request_api import get_siga_grabaciones
+from .request_api import get_siga_grabaciones, post_siga_grabacion
 
 encabezados = ["ID", "Inicio", "Sala", "Autoridad", "Expediente", "Duración", "Tamaño", "Estado"]
 
@@ -83,7 +83,7 @@ def crear(
     archivo_ruta: str,
 ):
     """Crea un nuevo registro de grabación"""
-    rich.print("Crear registro de grabación...")
+    rich.print("[bold cyan]=== Crear registro de grabación ===[/bold cyan]")
 
     # Extraer nombre del archivo
     archivo_nombre = os.path.basename(archivo_ruta)
@@ -105,6 +105,7 @@ def crear(
     if count_guion_bajos < 5:
         typer.secho("Error en el nombre del archivo. Falta de secciones separados por guiones bajos '_'.", fg=typer.colors.RED)
         raise typer.Exit()
+    rich.print("[cyan]- Lectura de datos.[/cyan]")
     # Leer tiempo de inicio
     try:
         inicio_str = archivo_nombre.split("_")[0] + archivo_nombre.split("_")[1]
@@ -115,12 +116,13 @@ def crear(
         raise typer.Exit()
     # Cálculos de tiempos
     # Extraer la duración del archivo de video mp4
-    try:
-        process = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", archivo_mp4_ruta], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        duracion = timedelta(seconds=float(process.stdout))
-    except:
-        typer.secho("Error se necesita el programa 'ffprobe' para calcular la duración del video.", fg=typer.colors.RED)
-        raise typer.Exit()
+    duracion = timedelta(seconds=4556.299)
+    # try:
+    #     process = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", archivo_mp4_ruta], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #     duracion = timedelta(seconds=float(process.stdout))
+    # except:
+    #     typer.secho("Error se necesita el programa 'ffprobe' para calcular la duración del video.", fg=typer.colors.RED)
+    #     raise typer.Exit()
     termino_datetime = inicio_datetime + duracion
     termino_str = termino_datetime.strftime("%Y/%m/%d %H:%M:%S")
     # Extraer el tamaño del archivo
@@ -137,15 +139,42 @@ def crear(
     dia = f"{inicio_datetime.day:02d}"
     justicia_ruta = f"{SIGA_JUSTICIA_RUTA}/{siga_sala_clave}/{anio}/{mes}/{dia}"
 
-    # Mostrar resultados
-    rich.print(f"Ruta: [green]{ruta}[/green]")
-    rich.print(f"Nombre del archivo: [green]{archivo_nombre}[/green]")
-    rich.print(f"Inicio: [green]{inicio_str}[/green]")
-    rich.print(f"Termino: [green]{termino_str}[/green]")
-    rich.print(f"Duración: [green]{duracion}[/green]")
-    rich.print(f"Tamaño: [green]{tamanio_str}[/green]")
-    rich.print(f"SIGA Sala Clave: [green]{siga_sala_clave}[/green]")
-    rich.print(f"Autoridad Clave: [green]{autoridad_clave}[/green]")
-    rich.print(f"Materia Clave: [green]{materia_clave}[/green]")
-    rich.print(f"Expediente: [green]{expediente}[/green]")
-    rich.print(f"Justicia Ruta: [green]{justicia_ruta}[/green]")
+    # Mostrar Metadatos
+    rich.print(f"Ruta: [yellow]{ruta}[/yellow]")
+    rich.print(f"Nombre del archivo: [yellow]{archivo_nombre}[/yellow]")
+    rich.print(f"Inicio: [yellow]{inicio_str}[/yellow]")
+    rich.print(f"Termino: [yellow]{termino_str}[/yellow]")
+    rich.print(f"Duración: [yellow]{duracion}[/yellow]")
+    rich.print(f"Tamaño: [yellow]{tamanio_str}[/yellow]")
+    rich.print(f"SIGA Sala Clave: [yellow]{siga_sala_clave}[/yellow]")
+    rich.print(f"Autoridad Clave: [yellow]{autoridad_clave}[/yellow]")
+    rich.print(f"Materia Clave: [yellow]{materia_clave}[/yellow]")
+    rich.print(f"Expediente: [yellow]{expediente}[/yellow]")
+    rich.print(f"Justicia Ruta: [yellow]{justicia_ruta}[/yellow]")
+
+    # Enviar datos
+    rich.print("[cyan]- Envío de información.[/cyan]")
+    try:
+        respuesta = post_siga_grabacion(
+            autoridad_clave=autoridad_clave,
+            siga_sala_clave=siga_sala_clave,
+            materia_clave=materia_clave,
+            expediente=expediente,
+            inicio=inicio_datetime,
+            termino=termino_datetime,
+            archivo_nombre=archivo_nombre,
+            justicia_ruta=justicia_ruta,
+            tamanio=tamanio,
+            duracion=duracion,
+        )
+    except CLIAnyError as error:
+        typer.secho(str(error), fg=typer.colors.RED)
+        raise typer.Exit()
+
+    # Mostrar Respuesta
+    rich.print("[cyan]- Respuesta.[/cyan]")
+    if respuesta["success"]:
+        rich.print(f"[bold green]Registro Correcto. {respuesta['message']}[/bold green]")
+        rich.print(f"ID registrado: [green]{respuesta['id']}[/green]")
+    else:
+        rich.print(f"[bold red]Registro Incorrecto. {respuesta['message']}[/bold red]")
