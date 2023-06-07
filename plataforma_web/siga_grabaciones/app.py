@@ -116,13 +116,12 @@ def crear(
         raise typer.Exit()
     # Cálculos de tiempos
     # Extraer la duración del archivo de video mp4
-    duracion = timedelta(seconds=4556.299)
-    # try:
-    #     process = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", archivo_mp4_ruta], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    #     duracion = timedelta(seconds=float(process.stdout))
-    # except:
-    #     typer.secho("Error se necesita el programa 'ffprobe' para calcular la duración del video.", fg=typer.colors.RED)
-    #     raise typer.Exit()
+    try:
+        process = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", archivo_mp4_ruta], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        duracion = timedelta(seconds=float(process.stdout))
+    except:
+        typer.secho("Error se necesita el programa 'ffprobe' para calcular la duración del video.", fg=typer.colors.RED)
+        raise typer.Exit()
     termino_datetime = inicio_datetime + duracion
     termino_str = termino_datetime.strftime("%Y/%m/%d %H:%M:%S")
     # Extraer el tamaño del archivo
