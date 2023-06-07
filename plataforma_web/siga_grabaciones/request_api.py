@@ -2,6 +2,7 @@
 CLI SIGA Grabaciones Request API
 """
 from typing import Any
+from datetime import datetime, timedelta
 
 import requests
 
@@ -61,3 +62,53 @@ def get_siga_grabaciones(
             raise CLIResponseError("Error al solicitar grabaciones: " + datos["message"])
         raise CLIResponseError("Error al solicitar grabaciones")
     return datos["result"]
+
+
+def post_siga_grabacion(
+    autoridad_clave: str,
+    siga_sala_clave: str,
+    materia_clave: str,
+    expediente: str,
+    inicio: datetime,
+    termino: datetime,
+    archivo_nombre: str,
+    justicia_ruta: str,
+    tamanio: int,
+    duracion: timedelta,
+) -> Any:
+    """Enviar datos de una grabación"""
+    parametros = {}
+    parametros["autoridad_clave"] = autoridad_clave
+    parametros["siga_sala_clave"] = siga_sala_clave
+    parametros["materia_clave"] = materia_clave
+    # parametros obligatorios
+    parametros["expediente"] = expediente
+    parametros["inicio"] = str(inicio)
+    parametros["termino"] = str(termino)
+    parametros["archivo_nombre"] = archivo_nombre
+    parametros["justicia_ruta"] = justicia_ruta
+    parametros["tamanio"] = tamanio
+    parametros["duracion"] = str(duracion)
+    # Envió de la solicitud
+    try:
+        respuesta = requests.post(
+            f"{BASE_URL}/siga_grabaciones",
+            headers={"X-Api-Key": API_KEY},
+            json=parametros,
+            timeout=TIMEOUT,
+        )
+        respuesta.raise_for_status()
+    except requests.exceptions.ConnectionError as error:
+        raise CLIConnectionError("No hubo respuesta al insertar grabación") from error
+    except requests.exceptions.HTTPError as error:
+        raise CLIStatusCodeError("Error Status Code al insertar grabación: " + str(error)) from error
+    except requests.exceptions.RequestException as error:
+        raise CLIRequestError("Error inesperado al insertar grabación") from error
+    # Respuesta
+    datos = respuesta.json()
+    print(datos)
+    if "success" not in datos or datos["success"] is False:
+        if "message" in datos:
+            raise CLIResponseError("Error al enviar grabación: " + datos["message"])
+        raise CLIResponseError("Error al enviar grabación")
+    return datos
