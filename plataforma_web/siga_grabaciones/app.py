@@ -3,16 +3,18 @@ CLI SIGA Grabaciones App
 """
 from datetime import datetime, timedelta
 from pathlib import Path
-import os
+import re
 import subprocess
 
 import rich
 import typer
 
 from common.exceptions import CLIAnyError
-from config.settings import LIMIT, SIGA_JUSTICIA_RUTA
+from config.settings import LIMIT
 
 from .request_api import get_siga_grabaciones, post_siga_grabacion
+
+ARCHIVO_NOMBRE_REGEXP = r"(\d{8})_(\d{6})_([A-Z0-1-]{1,16})_([A-Z0-1-]{1,16})_([A-Z]{3})_(\d{1,4}-\d{4}(-[A-Z-]+)?))"
 
 encabezados = ["ID", "Inicio", "Sala", "Autoridad", "Expediente", "Duración", "Tamaño"]
 
@@ -60,17 +62,15 @@ def consultar(
         table.add_column(enca)
     for registro in respuesta["items"]:
         inicio = datetime.strptime(registro["inicio"], "%Y-%m-%dT%H:%M:%S")
-        duracion = timedelta(seconds=registro["duracion"])
-        duracion_str = str(duracion).split(".")[0]
-        tamanio = f"{registro['tamanio'] / (1024 * 1024):0.2f} MB"
+        duracion_segundos = timedelta(seconds=registro["duracion"])
         table.add_row(
             str(registro["id"]),
             inicio.strftime("%Y-%m-%d %H:%M:%S"),
             registro["siga_sala_clave"],
             registro["autoridad_clave"],
             registro["expediente"],
-            duracion_str,
-            tamanio,
+            f"{duracion_segundos} seg.",
+            f"{registro['tamanio'] / (1024 * 1024):0.2f} MB",
         )
     console.print(table)
 
@@ -79,64 +79,76 @@ def consultar(
 
 
 @app.command()
-def crear(
-    archivo_ruta: str,
-):
+def crear(archivo: str):
     """Crea un nuevo registro de grabación"""
     rich.print("[bold cyan]=== Crear registro de grabación ===[/bold cyan]")
 
-    # Extraer nombre del archivo
-    archivo_nombre = os.path.basename(archivo_ruta)
-    archivo_nombre = os.path.splitext(archivo_nombre)[0]
-
-    # Revisar los pares de archivos .mp4 y .flv
-    ruta = os.path.dirname(archivo_ruta)
-    archivo_mp4_ruta = os.path.splitext(archivo_ruta)[0] + ".mp4"
-    if not os.path.isfile(archivo_mp4_ruta):
-        typer.secho("No se encuentra el archivo con extensión MP4", fg=typer.colors.RED)
-        raise typer.Exit()
-    archivo_flv_ruta = os.path.splitext(archivo_ruta)[0] + ".flv"
-    if not os.path.isfile(archivo_flv_ruta):
-        typer.secho("No se encuentra el archivo con extensión FLV", fg=typer.colors.RED)
+    # Validar con subprocess que exista el programa ffprobe
+    try:
+        process = subprocess.run(["ffprobe", "-version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True)
+    except FileNotFoundError as error:
+        typer.secho("No se encuentra el programa 'ffprobe' para calcular la duración del video. " + str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
-    # Extraer valores del nombre del archivo
-    count_guion_bajos = archivo_nombre.count("_")
-    if count_guion_bajos < 5:
-        typer.secho("Error en el nombre del archivo. Falta de secciones separados por guiones bajos '_'.", fg=typer.colors.RED)
+    # Ruta completa al archivo
+    archivo_ruta = Path(archivo)
+
+    # Validar que exista el archivo
+    if not archivo_ruta.is_file():
+        typer.secho("No se encuentra el archivo", fg=typer.colors.RED)
         raise typer.Exit()
-    rich.print("[cyan]- Lectura de datos.[/cyan]")
-    # Leer tiempo de inicio
-    try:
-        inicio_str = archivo_nombre.split("_")[0] + archivo_nombre.split("_")[1]
-        inicio_datetime = datetime.strptime(inicio_str, "%Y%m%d%H%M%S")
-        inicio_str = inicio_datetime.strftime("%Y/%m/%d %H:%M:%S")
-    except:
-        typer.secho("Error al leer la fecha-hora de inicio en el nombre del archivo. Formato no válido", fg=typer.colors.RED)
+
+    # Obtener la extensión del archivo
+    extension_archivo = archivo_ruta.suffix
+
+    # Validar que la extensión sea .mp4
+    if extension_archivo != ".mp4":
+        typer.secho("El archivo debe tener la extensión .mp4", fg=typer.colors.RED)
         raise typer.Exit()
-    # Cálculos de tiempos
-    # Extraer la duración del archivo de video mp4
+
+    # Obtener el nombre del archivo sin la extensión
+    archivo_nombre = archivo_ruta.stem
+
+    # Validar que el nombre del archivo cumpla con la expresión regular
+    coincidencia = re.match(ARCHIVO_NOMBRE_REGEXP, archivo_nombre)
+    if not coincidencia:
+        typer.secho("El nombre del archivo no cumple con el formato requerido", fg=typer.colors.RED)
+        raise typer.Exit()
+
+    # Extraer del nombre del archivo la fecha y la hora de inicio
+    inicio_str = coincidencia.group(1) + "T" + coincidencia.group(2)
+    inicio_datetime = datetime.strptime(inicio_str, "%y%m%dT%H%M%S")
+
+    # Extraer del nombre del archivo la clave de la sala
+    siga_sala_clave = coincidencia.group(3)
+
+    # Extraer del nombre del archivo la clave de la autoridad
+    autoridad_clave = coincidencia.group(4)
+
+    # Extraer del nombre del archivo la clave de la materia
+    materia_clave = coincidencia.group(5)
+
+    # Extraer del nombre del archivo el número de expediente
+    expediente = coincidencia.group(6)
+
+    # Obtener el tamaño del archivo con Pathlib
+    tamanio = archivo_ruta.stat().st_size
+    tamanio_str = f"{tamanio / (1024 * 1024):0.2f} MB"
+
+    # Obtener la duración del archivo de video con ffprobe
     try:
-        process = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", archivo_mp4_ruta], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", archivo_ruta], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True)
         duracion = timedelta(seconds=float(process.stdout))
     except:
-        typer.secho("Error se necesita el programa 'ffprobe' para calcular la duración del video.", fg=typer.colors.RED)
+        typer.secho("Error al ejecutar el programa 'ffprobe' para calcular la duración del video.", fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Calcular el término sumando el inicio y la duracion
     termino_datetime = inicio_datetime + duracion
-    termino_str = termino_datetime.strftime("%Y/%m/%d %H:%M:%S")
-    # Extraer el tamaño del archivo
-    tamanio = os.path.getsize(archivo_mp4_ruta)
-    tamanio_str = f"{tamanio / (1024 * 1024):0.2f} MB"
-    # Leer la Sala
-    siga_sala_clave = archivo_nombre.split("_")[2]
-    autoridad_clave = archivo_nombre.split("_")[3]
-    materia_clave = archivo_nombre.split("_")[4]
-    expediente = archivo_nombre.split("_")[5]
-    # Calcular ruta dentro de justicia
-    anio = f"{inicio_datetime.year:04d}"
-    mes = f"{inicio_datetime.month:02d}"
-    dia = f"{inicio_datetime.day:02d}"
-    justicia_ruta = f"{SIGA_JUSTICIA_RUTA}/{siga_sala_clave}/{anio}/{mes}/{dia}"
+    termino_str = termino_datetime.strftime("%Y/%m/%dT%H:%M:%S")
+
+    # Definir la ruta
+    justicia_ruta = archivo
 
     # Mostrar Metadatos
     rich.print(f"Ruta: [yellow]{ruta}[/yellow]")
@@ -170,10 +182,6 @@ def crear(
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
-    # Mostrar Respuesta
-    rich.print("[cyan]- Respuesta.[/cyan]")
-    if respuesta["success"]:
-        rich.print(f"[bold green]Registro Correcto. {respuesta['message']}[/bold green]")
-        rich.print(f"ID registrado: [green]{respuesta['id']}[/green]")
-    else:
-        rich.print(f"[bold red]Registro Incorrecto. {respuesta['message']}[/bold red]")
+    # Mostrar la respuesta
+    rich.print(f"Grabación creada con ID [green]{respuesta['id']}[/green]")
+    rich.print(f"Mensaje: [cyan]{respuesta['total']}[/cyan]")
