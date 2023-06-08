@@ -182,6 +182,10 @@ def crear(archivo: str):
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
-    # Mostrar la respuesta
-    rich.print(f"Grabación creada con ID [green]{respuesta['id']}[/green]")
-    rich.print(f"Mensaje: [cyan]{respuesta['total']}[/cyan]")
+    # Si la respuesta es exitosa
+    if respuesta["success"] is True:
+        rich.print(f"Grabación creada con ID [green]{respuesta['id']}[/green]")
+        rich.print(f"Mensaje: [cyan]{respuesta['message']}[/cyan]")
+    else:
+        typer.secho(f"No se creo la grabación por: {respuesta['message']}", fg=typer.colors.RED)
+        raise typer.Exit()
