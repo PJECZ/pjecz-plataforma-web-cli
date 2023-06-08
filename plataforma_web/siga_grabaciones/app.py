@@ -151,17 +151,16 @@ def crear(archivo: str):
     justicia_ruta = archivo
 
     # Mostrar Metadatos
-    rich.print(f"Ruta: [yellow]{ruta}[/yellow]")
-    rich.print(f"Nombre del archivo: [yellow]{archivo_nombre}[/yellow]")
-    rich.print(f"Inicio: [yellow]{inicio_str}[/yellow]")
-    rich.print(f"Termino: [yellow]{termino_str}[/yellow]")
-    rich.print(f"Duración: [yellow]{duracion}[/yellow]")
-    rich.print(f"Tamaño: [yellow]{tamanio_str}[/yellow]")
-    rich.print(f"SIGA Sala Clave: [yellow]{siga_sala_clave}[/yellow]")
     rich.print(f"Autoridad Clave: [yellow]{autoridad_clave}[/yellow]")
+    rich.print(f"SIGA Sala Clave: [yellow]{siga_sala_clave}[/yellow]")
     rich.print(f"Materia Clave: [yellow]{materia_clave}[/yellow]")
     rich.print(f"Expediente: [yellow]{expediente}[/yellow]")
+    rich.print(f"Inicio: [yellow]{inicio_str}[/yellow]")
+    rich.print(f"Termino: [yellow]{termino_str}[/yellow]")
+    rich.print(f"Nombre del archivo: [yellow]{archivo_nombre}[/yellow]")
     rich.print(f"Justicia Ruta: [yellow]{justicia_ruta}[/yellow]")
+    rich.print(f"Tamaño: [yellow]{tamanio_str}[/yellow]")
+    rich.print(f"Duración: [yellow]{duracion}[/yellow]")
 
     # Enviar datos
     rich.print("[cyan]- Envío de información.[/cyan]")
