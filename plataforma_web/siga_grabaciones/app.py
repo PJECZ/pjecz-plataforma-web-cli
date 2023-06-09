@@ -14,7 +14,7 @@ from config.settings import LIMIT
 
 from .request_api import get_siga_grabaciones, post_siga_grabacion
 
-ARCHIVO_NOMBRE_REGEXP = r"(\d{8})_(\d{6})_([A-Z0-1-]{1,16})_([A-Z0-1-]{1,16})_([A-Z]{3})_(\d{1,4}-\d{4}(-[A-Z-]+)?))"
+ARCHIVO_NOMBRE_REGEXP = r"(\d\d\d\d-\d\d-\d\d)_(\d\d-\d\d-\d\d)_([A-Z0-1-]{1,16})_([A-Z0-1-]{1,16})_([A-Z]{3})_(\d{1,4}-\d{4}(-[A-Z-]+)?)"
 
 encabezados = ["ID", "Inicio", "Sala", "Autoridad", "Expediente", "Duración", "Tamaño"]
 
@@ -81,7 +81,8 @@ def consultar(
 @app.command()
 def crear(archivo: str):
     """Crea un nuevo registro de grabación"""
-    rich.print("[bold cyan]=== Crear registro de grabación ===[/bold cyan]")
+    rich.print("Crear registro de grabación...")
+    rich.print(f"Archivo:         [cyan]{archivo}[/cyan]")
 
     # Validar con subprocess que exista el programa ffprobe
     try:
@@ -109,6 +110,10 @@ def crear(archivo: str):
     # Obtener el nombre del archivo sin la extensión
     archivo_nombre = archivo_ruta.stem
 
+    # Consultar el nombre del archivo con la API
+
+    # Si ya se encuentra registrado, terminar con el mensaje que ya existe
+
     # Validar que el nombre del archivo cumpla con la expresión regular
     coincidencia = re.match(ARCHIVO_NOMBRE_REGEXP, archivo_nombre)
     if not coincidencia:
@@ -116,8 +121,12 @@ def crear(archivo: str):
         raise typer.Exit()
 
     # Extraer del nombre del archivo la fecha y la hora de inicio
-    inicio_str = coincidencia.group(1) + "T" + coincidencia.group(2)
-    inicio_datetime = datetime.strptime(inicio_str, "%y%m%dT%H%M%S")
+    fecha_str = coincidencia.group(1)  # YYYY-MM-DD
+    horas_minutos_segundos_str = coincidencia.group(2).replace("-", ":")  # HH:MM:SS
+
+    # Definir inicio_datetime con la fecha y hora de inicio
+    inicio_str = f"{fecha_str}T{horas_minutos_segundos_str}"
+    inicio_datetime = datetime.strptime(inicio_str, "%Y-%m-%dT%H:%M:%S")
 
     # Extraer del nombre del archivo la clave de la sala
     siga_sala_clave = coincidencia.group(3)
@@ -145,7 +154,7 @@ def crear(archivo: str):
 
     # Calcular el término sumando el inicio y la duracion
     termino_datetime = inicio_datetime + duracion
-    termino_str = termino_datetime.strftime("%Y/%m/%dT%H:%M:%S")
+    termino_str = termino_datetime.strftime("%Y-%m-%dT%H:%M:%S")
 
     # Definir la ruta
     justicia_ruta = archivo
@@ -157,13 +166,12 @@ def crear(archivo: str):
     rich.print(f"Expediente:      [yellow]{expediente}[/yellow]")
     rich.print(f"Inicio:          [yellow]{inicio_str}[/yellow]")
     rich.print(f"Termino:         [yellow]{termino_str}[/yellow]")
-    rich.print(f"Archivo:         [yellow]{archivo_nombre}[/yellow]")
-    rich.print(f"Justicia Ruta:   [yellow]{justicia_ruta}[/yellow]")
+    rich.print(f"Archivo nombre:  [yellow]{archivo_nombre}[/yellow]")
+    rich.print(f"Justicia ruta:   [yellow]{justicia_ruta}[/yellow]")
     rich.print(f"Tamaño:          [yellow]{tamanio_str}[/yellow]")
     rich.print(f"Duración:        [yellow]{duracion}[/yellow]")
 
     # Enviar datos
-    rich.print("[cyan]- Envío de información.[/cyan]")
     try:
         respuesta = post_siga_grabacion(
             autoridad_clave=autoridad_clave,
@@ -183,8 +191,8 @@ def crear(archivo: str):
 
     # Si la respuesta es exitosa
     if respuesta["success"] is True:
-        rich.print(f"Grabación creada con ID [green]{respuesta['id']}[/green]")
-        rich.print(f"Mensaje: [cyan]{respuesta['message']}[/cyan]")
+        rich.print(f"ID:              [green]{respuesta['id']}[/green]")
+        rich.print(f"Mensaje:         [green]{respuesta['message']}[/green]")
     else:
         typer.secho(f"No se creo la grabación por: {respuesta['message']}", fg=typer.colors.RED)
         raise typer.Exit()

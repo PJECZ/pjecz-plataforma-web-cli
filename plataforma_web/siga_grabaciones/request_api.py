@@ -105,7 +105,6 @@ def post_siga_grabacion(
     except requests.exceptions.RequestException as error:
         raise CLIRequestError("Error inesperado al crear la grabación") from error
     datos = respuesta.json()
-    print(datos)
     if "success" not in datos or datos["success"] is False:
         if "message" in datos:
             raise CLIResponseError("Error al enviar grabación: " + datos["message"])
