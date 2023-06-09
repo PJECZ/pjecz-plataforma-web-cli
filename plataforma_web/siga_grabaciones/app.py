@@ -12,11 +12,11 @@ import typer
 from common.exceptions import CLIAnyError
 from config.settings import LIMIT
 
-from .request_api import get_siga_grabaciones, post_siga_grabacion
+from .request_api import get_siga_grabaciones, get_siga_grabacion_with_archivo_nombre, post_siga_grabacion
 
 ARCHIVO_NOMBRE_REGEXP = r"(\d\d\d\d-\d\d-\d\d)_(\d\d-\d\d-\d\d)_([A-Z0-1-]{1,16})_([A-Z0-1-]{1,16})_([A-Z]{3})_(\d{1,4}-\d{4}(-[A-Z-]+)?)"
 
-encabezados = ["ID", "Inicio", "Sala", "Autoridad", "Expediente", "Duración", "Tamaño"]
+encabezados = ["ID", "Archivo Nombre", "Inicio", "Sala", "Autoridad", "Expediente", "Duración", "Tamaño"]
 
 app = typer.Typer()
 
@@ -65,6 +65,7 @@ def consultar(
         duracion_segundos = timedelta(seconds=registro["duracion"])
         table.add_row(
             str(registro["id"]),
+            registro["archivo_nombre"],
             inicio.strftime("%Y-%m-%d %H:%M:%S"),
             registro["siga_sala_clave"],
             registro["autoridad_clave"],
@@ -111,8 +112,16 @@ def crear(archivo: str):
     archivo_nombre = archivo_ruta.stem
 
     # Consultar el nombre del archivo con la API
+    try:
+        respuesta = get_siga_grabacion_with_archivo_nombre(archivo_nombre=archivo_nombre)
+    except CLIAnyError as error:
+        typer.secho(str(error), fg=typer.colors.RED)
+        raise typer.Exit()
 
     # Si ya se encuentra registrado, terminar con el mensaje que ya existe
+    if respuesta["success"] is True:
+        typer.secho("El archivo ya se encuentra registrado", fg=typer.colors.RED)
+        raise typer.Exit()
 
     # Validar que el nombre del archivo cumpla con la expresión regular
     coincidencia = re.match(ARCHIVO_NOMBRE_REGEXP, archivo_nombre)

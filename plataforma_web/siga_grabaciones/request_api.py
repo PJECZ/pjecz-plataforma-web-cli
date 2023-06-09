@@ -64,6 +64,27 @@ def get_siga_grabaciones(
     return datos["result"]
 
 
+def get_siga_grabacion_with_archivo_nombre(archivo_nombre: str) -> Any:
+    """Consultar una grabación por archivo_nombre"""
+    try:
+        respuesta = requests.get(
+            f"{BASE_URL}/siga_grabaciones/archivo_nombre/{archivo_nombre}",
+            headers={"X-Api-Key": API_KEY},
+            timeout=TIMEOUT,
+        )
+        respuesta.raise_for_status()
+    except requests.exceptions.ConnectionError as error:
+        raise CLIConnectionError("No hubo respuesta al consultar la grabación por archivo_nombre") from error
+    except requests.exceptions.HTTPError as error:
+        raise CLIStatusCodeError("Error Status Code al consultar la grabación por archivo_nombre: " + str(error)) from error
+    except requests.exceptions.RequestException as error:
+        raise CLIRequestError("Error inesperado al consultar la grabación por archivo_nombre") from error
+    datos = respuesta.json()
+    if "success" not in datos or "message" not in datos:
+        raise CLIResponseError("Error porque falta success o message al consultar la grabación por archivo_nombre")
+    return datos
+
+
 def post_siga_grabacion(
     autoridad_clave: str,
     siga_sala_clave: str,
@@ -105,8 +126,6 @@ def post_siga_grabacion(
     except requests.exceptions.RequestException as error:
         raise CLIRequestError("Error inesperado al crear la grabación") from error
     datos = respuesta.json()
-    if "success" not in datos or datos["success"] is False:
-        if "message" in datos:
-            raise CLIResponseError("Error al enviar grabación: " + datos["message"])
-        raise CLIResponseError("Error al enviar grabación")
+    if "success" not in datos or "message" not in datos:
+        raise CLIResponseError("Error porque falta success o message al crear la grabación")
     return datos
