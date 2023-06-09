@@ -77,19 +77,19 @@ def post_siga_grabacion(
     duracion: timedelta,
 ) -> Any:
     """Enviar datos de una grabación"""
-    parametros = {}
-    parametros["autoridad_clave"] = autoridad_clave
-    parametros["siga_sala_clave"] = siga_sala_clave
-    parametros["materia_clave"] = materia_clave
-    # parametros obligatorios
-    parametros["expediente"] = expediente
-    parametros["inicio"] = str(inicio)
-    parametros["termino"] = str(termino)
-    parametros["archivo_nombre"] = archivo_nombre
-    parametros["justicia_ruta"] = justicia_ruta
-    parametros["tamanio"] = tamanio
-    parametros["duracion"] = str(duracion)
-    # Envió de la solicitud
+    parametros = {
+        "autoridad_clave": autoridad_clave,
+        "siga_sala_clave": siga_sala_clave,
+        "materia_clave": materia_clave,
+        "expediente": expediente,
+        "inicio": str(inicio),
+        "termino": str(termino),
+        "archivo_nombre": archivo_nombre,
+        "justicia_ruta": justicia_ruta,
+        "tamanio": tamanio,
+        "duracion": int(duracion.total_seconds()),
+        "estado": "VALIDO",
+    }
     try:
         respuesta = requests.post(
             f"{BASE_URL}/siga_grabaciones",
@@ -99,12 +99,11 @@ def post_siga_grabacion(
         )
         respuesta.raise_for_status()
     except requests.exceptions.ConnectionError as error:
-        raise CLIConnectionError("No hubo respuesta al insertar grabación") from error
+        raise CLIConnectionError("No hubo respuesta al crear la grabación") from error
     except requests.exceptions.HTTPError as error:
-        raise CLIStatusCodeError("Error Status Code al insertar grabación: " + str(error)) from error
+        raise CLIStatusCodeError("Error Status Code al crear la grabación: " + str(error)) from error
     except requests.exceptions.RequestException as error:
-        raise CLIRequestError("Error inesperado al insertar grabación") from error
-    # Respuesta
+        raise CLIRequestError("Error inesperado al crear la grabación") from error
     datos = respuesta.json()
     print(datos)
     if "success" not in datos or datos["success"] is False:
