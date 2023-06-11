@@ -12,7 +12,7 @@ from config.settings import LIMIT
 
 from .request_api import get_bitacoras
 
-encabezados = ["ID", "Creado", "Clave", "Descripcion"]
+encabezados = ["ID", "Creado", "Modulo", "email", "Descripcion"]
 
 app = typer.Typer()
 
@@ -49,13 +49,13 @@ def consultar(
     for enca in encabezados:
         table.add_column(enca)
     for registro in respuesta["items"]:
-        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f")
+        # creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f")
         table.add_row(
             str(registro["id"]),
-            creado.strftime("%Y-%m-%d %H:%M:%S"),
-            registro["clave"],
+            registro["creado"],
+            registro["modulo_nombre"],
+            registro["usuario_email"],
             registro["descripcion"],
-            "SI" if registro["es_x"] else "NO",
         )
     console.print(table)
 

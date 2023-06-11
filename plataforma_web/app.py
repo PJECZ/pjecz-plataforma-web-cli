@@ -9,6 +9,7 @@ from plataforma_web.centros_trabajos.app import app as centros_trabajos_app
 from plataforma_web.distritos.app import app as distritos_app
 from plataforma_web.domicilios.app import app as domicilios_app
 from plataforma_web.edictos.app import app as edictos_app
+from plataforma_web.entradas_salidas.app import app as entradas_salidas_app
 from plataforma_web.funcionarios.app import app as funcionarios_app
 from plataforma_web.inv_categorias.app import app as inv_categorias_app
 from plataforma_web.inv_componentes.app import app as inv_componentes_app
@@ -36,6 +37,7 @@ app.add_typer(centros_trabajos_app, name="centros_trabajos")
 app.add_typer(distritos_app, name="distritos")
 app.add_typer(domicilios_app, name="domicilios")
 app.add_typer(edictos_app, name="edictos")
+app.add_typer(entradas_salidas_app, name="entradas_salidas")
 app.add_typer(funcionarios_app, name="funcionarios")
 app.add_typer(inv_categorias_app, name="inv_categorias")
 app.add_typer(inv_componentes_app, name="inv_componentes")
