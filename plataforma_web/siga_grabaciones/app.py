@@ -61,12 +61,12 @@ def consultar(
     for enca in encabezados:
         table.add_column(enca)
     for registro in respuesta["items"]:
-        inicio = datetime.strptime(registro["inicio"], "%Y-%m-%dT%H:%M:%S")
+        inicio_datetime = datetime.fromisoformat(registro["inicio"].replace("Z", "+00:00"))
         duracion_segundos = timedelta(seconds=registro["duracion"])
         table.add_row(
             str(registro["id"]),
             registro["archivo_nombre"],
-            inicio.strftime("%Y-%m-%d %H:%M:%S"),
+            inicio_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             registro["siga_sala_clave"],
             registro["autoridad_clave"],
             registro["expediente"],

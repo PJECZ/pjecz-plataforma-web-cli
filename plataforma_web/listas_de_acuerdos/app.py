@@ -59,10 +59,10 @@ def consultar(
     for enca in encabezados:
         table.add_column(enca)
     for registro in respuesta["items"]:
-        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+        creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
         table.add_row(
             str(registro["id"]),
-            creado.strftime("%Y-%m-%d %H:%M:%S"),
+            creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             registro["autoridad_clave"],
             registro["fecha"],
             registro["descripcion"],
@@ -98,11 +98,11 @@ def guardar():
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:
-                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+                creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
                 escritor.writerow(
                     [
                         registro["id"],
-                        creado.strftime("%Y-%m-%d %H:%M:%S"),
+                        creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                         registro["autoridad_clave"],
                         registro["fecha"],
                         registro["descripcion"],
@@ -151,14 +151,14 @@ def consultar_creadas(
                 "ND",
             )
             continue
-        creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+        creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
         table.add_row(
             registro["autoridad_clave"],
             registro["distrito_nombre_corto"],
             registro["autoridad_descripcion_corta"],
             str(registro["id"]),
             registro["fecha"],
-            creado.strftime("%Y-%m-%d %H:%M:%S"),
+            creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             registro["archivo"],
         )
         contador += 1
