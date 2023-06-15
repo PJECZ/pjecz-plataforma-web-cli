@@ -79,7 +79,7 @@ def send_creadas(
                 ]
             )
             continue
-        dato_creado = datetime.strptime(dato["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+        creado_datetime = datetime.fromisoformat(dato["creado"].replace("Z", "+00:00"))
         renglones.append(
             [
                 dato["autoridad_clave"],
@@ -87,7 +87,7 @@ def send_creadas(
                 dato["autoridad_descripcion_corta"],
                 dato["id"],
                 dato["fecha"],
-                dato_creado.strftime("%Y-%m-%d %H:%M:%S"),
+                creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                 dato["archivo"] if test else f"<a href=\"{dato['url']}\">{dato['archivo']}</a>",
             ]
         )

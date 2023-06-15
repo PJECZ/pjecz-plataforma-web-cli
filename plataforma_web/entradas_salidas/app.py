@@ -45,10 +45,10 @@ def consultar(
     for enca in encabezados:
         table.add_column(enca)
     for registro in respuesta["items"]:
-        # creado = datetime.strptime(, "%Y-%m-%dT%H:%M:%S.%f")
+        creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
         table.add_row(
             str(registro["id"]),
-            registro["creado"],
+            creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             registro["usuario_email"],
             registro["tipo"],
             registro["direccion_ip"],
