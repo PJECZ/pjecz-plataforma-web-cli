@@ -5,7 +5,9 @@ import typer
 
 from plataforma_web.autoridades.app import app as autoridades_app
 from plataforma_web.bitacoras.app import app as bitacoras_app
+from plataforma_web.boletines.app import app as boletines_app
 from plataforma_web.centros_trabajos.app import app as centros_trabajos_app
+from plataforma_web.cit_dias_inhabiles.app import app as cit_dias_inhabiles_app
 from plataforma_web.distritos.app import app as distritos_app
 from plataforma_web.domicilios.app import app as domicilios_app
 from plataforma_web.edictos.app import app as edictos_app
@@ -33,7 +35,9 @@ from plataforma_web.usuarios.app import app as usuarios_app
 app = typer.Typer()
 app.add_typer(autoridades_app, name="autoridades")
 app.add_typer(bitacoras_app, name="bitacoras")
+app.add_typer(boletines_app, name="boletines")
 app.add_typer(centros_trabajos_app, name="centros_trabajos")
+app.add_typer(cit_dias_inhabiles_app, name="cit_dias_inhabiles")
 app.add_typer(distritos_app, name="distritos")
 app.add_typer(domicilios_app, name="domicilios")
 app.add_typer(edictos_app, name="edictos")
