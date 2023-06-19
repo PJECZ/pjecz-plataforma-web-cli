@@ -66,6 +66,9 @@ SLEEP=2
 # SENDGRID
 SENDGRID_API_KEY=SG.XXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 SENDGRID_FROM_EMAIL=remitente@pjecz.gob.mx
+
+# SIGA rutas en el servidor Justicia
+SIGA_JUSTICIA_RUTA=/mnt/respaldos/siga
 ```
 
 Crear un archivo `.bashrc` para activar el entorno virtual y cargar las variables de entorno:
@@ -89,6 +92,7 @@ then
     echo "-- Variables de entorno"
     export $(grep -v '^#' .env | xargs)
     echo "   API_KEY: ${API_KEY}"
+    echo "   SIGA_JUSTICIA_RUTA: ${SIGA_JUSTICIA_RUTA}"
     echo "   HOST: ${HOST}"
     echo "   LIMIT: ${LIMIT}"
     echo "   TIMEOUT: ${TIMEOUT}"
