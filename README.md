@@ -92,10 +92,10 @@ then
     echo "-- Variables de entorno"
     export $(grep -v '^#' .env | xargs)
     echo "   API_KEY: ${API_KEY}"
-    echo "   SIGA_JUSTICIA_RUTA: ${SIGA_JUSTICIA_RUTA}"
     echo "   HOST: ${HOST}"
     echo "   LIMIT: ${LIMIT}"
     echo "   TIMEOUT: ${TIMEOUT}"
+    echo "   SIGA_JUSTICIA_RUTA: ${SIGA_JUSTICIA_RUTA}"
     echo "   SLEEP: ${SLEEP}"
     echo "   SENDGRID_API_KEY: ${SENDGRID_API_KEY}"
     echo "   SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL}"
