@@ -2,8 +2,8 @@
 CLI Sentencias App
 """
 import csv
-from datetime import datetime
 import time
+from datetime import datetime
 
 import rich
 import typer
@@ -78,6 +78,8 @@ def consultar(
     # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
     for registro in respuesta["items"]:
         creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
         table.add_row(
@@ -155,10 +157,17 @@ def guardar(
                 creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
                 escritor.writerow(
                     [
-                        registro["id"],
+                        str(registro["id"]),
                         creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-                        registro["clave"],
-                        registro["descripcion"],
+                        registro["autoridad_clave"],
+                        registro["materia_nombre"],
+                        registro["materia_tipo_juicio_descripcion"],
+                        registro["sentencia"],
+                        registro["sentencia_fecha"],
+                        registro["expediente"],
+                        registro["fecha"],
+                        "SI" if registro["es_perspectiva_genero"] else "NO",
+                        registro["archivo"],
                     ]
                 )
             offset += LIMIT

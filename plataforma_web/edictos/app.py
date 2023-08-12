@@ -2,8 +2,8 @@
 CLI Edictos App
 """
 import csv
-from datetime import datetime
 import time
+from datetime import datetime
 
 import rich
 import typer
@@ -142,11 +142,11 @@ def guardar(
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:
-                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
                 escritor.writerow(
                     [
                         registro["id"],
-                        creado.strftime("%Y-%m-%d %H:%M:%S"),
+                        creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                         registro["autoridad_clave"],
                         registro["fecha"],
                         registro["descripcion"],

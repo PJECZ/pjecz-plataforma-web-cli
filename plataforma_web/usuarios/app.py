@@ -2,8 +2,8 @@
 CLI Usuarios App
 """
 import csv
-from datetime import datetime
 import time
+from datetime import datetime
 
 import rich
 import typer
@@ -127,7 +127,7 @@ def guardar(
             for registro in respuesta["items"]:
                 escritor.writerow(
                     [
-                        registro["id"],
+                        str(registro["id"]),
                         registro["distrito_clave"],
                         registro["autoridad_clave"],
                         registro["oficina_clave"],
