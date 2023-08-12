@@ -6,10 +6,23 @@ from datetime import datetime
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
-from .request_api import get_sentencias
+encabezados = [
+    "ID",
+    "Creado",
+    "Autoridad",
+    "Materia",
+    "Tipo de Juicio",
+    "Sentencia",
+    "Sentencia F.",
+    "Expediente",
+    "Fecha",
+    "Es P.G.",
+    "Archivo",
+]
 
 app = typer.Typer()
 
@@ -30,25 +43,39 @@ def consultar(
 ):
     """Consultar sentencias"""
     rich.print("Consultar sentencias...")
+
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if autoridad_id is not None:
+        parametros["autoridad_id"] = autoridad_id
+    if autoridad_clave is not None:
+        parametros["autoridad_clave"] = autoridad_clave
+    if creado is not None:
+        parametros["creado"] = creado
+    if creado_desde is not None:
+        parametros["creado_desde"] = creado_desde
+    if creado_hasta is not None:
+        parametros["creado_hasta"] = creado_hasta
+    if fecha is not None:
+        parametros["fecha"] = fecha
+    if fecha_desde is not None:
+        parametros["fecha_desde"] = fecha_desde
+    if fecha_hasta is not None:
+        parametros["fecha_hasta"] = fecha_hasta
+    if materia_tipo_juicio_id is not None:
+        parametros["materia_tipo_juicio_id"] = materia_tipo_juicio_id
     try:
-        respuesta = get_sentencias(
-            autoridad_id=autoridad_id,
-            autoridad_clave=autoridad_clave,
-            creado=creado,
-            creado_desde=creado_desde,
-            creado_hasta=creado_hasta,
-            fecha=fecha,
-            fecha_desde=fecha_desde,
-            fecha_hasta=fecha_hasta,
-            materia_tipo_juicio_id=materia_tipo_juicio_id,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="sentencias",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Mostrar la tabla
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Creado", "Autoridad", "Materia", "Tipo de Juicio", "Sentencia", "Sentencia F.", "Expediente", "Fecha", "Es P.G.", "Archivo")
+    table = rich.table.Table()
     for registro in respuesta["items"]:
         creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
         table.add_row(
@@ -65,4 +92,6 @@ def consultar(
             registro["archivo"],
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] sentencias")

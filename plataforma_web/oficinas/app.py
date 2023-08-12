@@ -8,10 +8,9 @@ import time
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SLEEP
-
-from .request_api import get_oficinas
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Clave", "Distrito", "Edificio", "Descripcion"]
 
@@ -30,17 +29,22 @@ def consultar(
     """Consultar oficinas"""
     rich.print("Consultar oficinas...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
+    if domicilio_id is not None:
+        parametros["domicilio_id"] = domicilio_id
+    if es_jurisdiccional is not None:
+        parametros["es_jurisdiccional"] = es_jurisdiccional
     try:
-        respuesta = get_oficinas(
-            distrito_id=distrito_id,
-            distrito_clave=distrito_clave,
-            domicilio_id=domicilio_id,
-            es_jurisdiccional=es_jurisdiccional,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="modulos",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -62,7 +66,12 @@ def consultar(
 
 
 @app.command()
-def guardar():
+def guardar(
+    distrito_id: int = None,
+    distrito_clave: str = None,
+    domicilio_id: int = None,
+    es_jurisdiccional: bool = None,
+):
     """Guardar oficinas en un archivo CSV"""
     rich.print("Guardar oficinas...")
 
@@ -76,12 +85,21 @@ def guardar():
         escritor.writerow(encabezados)
         offset = 0
         while True:
+            parametros = {"limit": LIMIT, "offset": offset}
+            if distrito_id is not None:
+                parametros["distrito_id"] = distrito_id
+            if distrito_clave is not None:
+                parametros["distrito_clave"] = distrito_clave
+            if domicilio_id is not None:
+                parametros["domicilio_id"] = domicilio_id
+            if es_jurisdiccional is not None:
+                parametros["es_jurisdiccional"] = es_jurisdiccional
             try:
-                respuesta = get_oficinas(
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="modulos",
+                    parametros=parametros,
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:

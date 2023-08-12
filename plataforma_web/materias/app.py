@@ -4,10 +4,9 @@ CLI Materias App
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
-
-from .request_api import get_materias
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 app = typer.Typer()
 
@@ -19,14 +18,19 @@ def consultar(
 ):
     """Consultar materias"""
     rich.print("Consultar materias...")
+
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
     try:
-        respuesta = get_materias(
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="materias",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table("ID", "Clave", "Nombre")
     for registro in respuesta["items"]:
@@ -36,4 +40,6 @@ def consultar(
             registro["nombre"],
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] materias")

@@ -8,10 +8,9 @@ import time
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SLEEP
-
-from .request_api import get_distritos
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Clave", "Nombre", "Nombre Corto", "Es D.", "Es J.", "Es D.J."]
 
@@ -29,16 +28,20 @@ def consultar(
     """Consultar distritos"""
     rich.print("Consultar distritos...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if es_distrito is not None:
+        parametros["es_distrito"] = es_distrito
+    if es_distrito_judicial is not None:
+        parametros["es_distrito_judicial"] = es_distrito_judicial
+    if es_jurisdiccional is not None:
+        parametros["es_jurisdiccional"] = es_jurisdiccional
     try:
-        respuesta = get_distritos(
-            es_distrito=es_distrito,
-            es_distrito_judicial=es_distrito_judicial,
-            es_jurisdiccional=es_jurisdiccional,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="distritos",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -64,7 +67,11 @@ def consultar(
 
 
 @app.command()
-def guardar():
+def guardar(
+    es_distrito: bool = None,
+    es_distrito_judicial: bool = None,
+    es_jurisdiccional: bool = None,
+):
     """Guardar distritos en un archivo CSV"""
     rich.print("Guardar distritos...")
 
@@ -78,12 +85,19 @@ def guardar():
         escritor.writerow(encabezados)
         offset = 0
         while True:
+            parametros = {"limit": LIMIT, "offset": offset}
+            if es_distrito is not None:
+                parametros["es_distrito"] = es_distrito
+            if es_distrito_judicial is not None:
+                parametros["es_distrito_judicial"] = es_distrito_judicial
+            if es_jurisdiccional is not None:
+                parametros["es_jurisdiccional"] = es_jurisdiccional
             try:
-                respuesta = get_distritos(
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="distritos",
+                    parametros=parametros,
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:

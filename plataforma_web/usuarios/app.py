@@ -8,10 +8,9 @@ import time
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SLEEP
-
-from .request_api import get_usuarios
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Distrito", "Autoridad", "Oficina", "email", "Nombres", "A. Paterno", "A. Materno", "Workspace"]
 
@@ -25,24 +24,30 @@ def consultar(
     oficina_id: int = None,
     oficina_clave: str = None,
     workspace: str = None,
-    offset: int = 0,
     limit: int = LIMIT,
+    offset: int = 0,
 ):
     """Consultar usuarios"""
     rich.print("Consultar usuarios...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if autoridad_id is not None:
+        parametros["autoridad_id"] = autoridad_id
+    if autoridad_clave is not None:
+        parametros["autoridad_clave"] = autoridad_clave
+    if oficina_id is not None:
+        parametros["oficina_id"] = oficina_id
+    if oficina_clave is not None:
+        parametros["oficina_clave"] = oficina_clave
+    if workspace is not None:
+        parametros["workspace"] = workspace
     try:
-        respuesta = get_usuarios(
-            autoridad_id=autoridad_id,
-            autoridad_clave=autoridad_clave,
-            oficina_id=oficina_id,
-            oficina_clave=oficina_clave,
-            workspace=workspace,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="usuarios",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -90,17 +95,23 @@ def guardar(
         escritor.writerow(encabezados)
         offset = 0
         while True:
+            parametros = {"limit": LIMIT, "offset": offset}
+            if autoridad_id is not None:
+                parametros["autoridad_id"] = autoridad_id
+            if autoridad_clave is not None:
+                parametros["autoridad_clave"] = autoridad_clave
+            if oficina_id is not None:
+                parametros["oficina_id"] = oficina_id
+            if oficina_clave is not None:
+                parametros["oficina_clave"] = oficina_clave
+            if workspace is not None:
+                parametros["workspace"] = workspace
             try:
-                respuesta = get_usuarios(
-                    autoridad_id=autoridad_id,
-                    autoridad_clave=autoridad_clave,
-                    oficina_id=oficina_id,
-                    oficina_clave=oficina_clave,
-                    workspace=workspace,
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="usuarios",
+                    parametros=parametros,
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:

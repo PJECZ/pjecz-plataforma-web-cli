@@ -1,14 +1,10 @@
 {
-    "editor.formatOnSave": true,
-    "git.branchProtection": ["main"],
-    "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": [
-        "--max-line-length",
-        "256"
-    ],
-    "python.formatting.provider": "black",
-    "python.formatting.blackArgs": [
-        "--line-length",
-        "256"
-    ]
+  "black-formatter.args": ["--line-length", "128"],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "git.branchProtection": ["main"],
+  "pylint.args": ["--max-line-length=128"],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
 }

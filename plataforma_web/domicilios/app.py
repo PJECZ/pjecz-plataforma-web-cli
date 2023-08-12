@@ -8,10 +8,9 @@ import time
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SLEEP
-
-from .request_api import get_domicilios
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Distrito", "Edificio", "Calle", "No. Ext.", "No. Int.", "Colonia", "Municipio", "C.P."]
 
@@ -26,13 +25,13 @@ def consultar(
     """Consultar domicilios"""
     rich.print("Consultar domicilios...")
 
-    # Solicitar datos
+    # Consultar a la API
     try:
-        respuesta = get_domicilios(
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="domicilios",
+            parametros={"limit": limit, "offset": offset},
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -75,11 +74,11 @@ def guardar():
         offset = 0
         while True:
             try:
-                respuesta = get_domicilios(
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="distritos",
+                    parametros={"limit": LIMIT, "offset": offset},
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:

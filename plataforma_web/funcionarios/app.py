@@ -4,10 +4,11 @@ CLI Funcionarios App
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
-from .request_api import get_funcionarios
+encabezados = ["ID", "Nombres", "A. Paterno", "A. Materno", "CURP", "e-mail", "En F.", "En S."]
 
 app = typer.Typer()
 
@@ -21,18 +22,27 @@ def consultar(
 ):
     """Consultar funcionarios"""
     rich.print("Consultar funcionario...")
+
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if en_funciones is not None:
+        parametros["en_funciones"] = en_funciones
+    if en_soportes is not None:
+        parametros["en_soportes"] = en_soportes
     try:
-        respuesta = get_funcionarios(
-            en_funciones=en_funciones,
-            en_soportes=en_soportes,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="funcionarios",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Mostrar la tabla
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Nombres", "A. Paterno", "A. Materno", "CURP", "e-mail", "En F.", "En S.")
+    table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
@@ -45,4 +55,6 @@ def consultar(
             "SI" if registro["en_soportes"] else "NO",
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] funcionario")

@@ -4,10 +4,11 @@ CLI Centros de Trabajo App
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
-from .request_api import get_centros_trabajos
+encabezados = ["ID", "Clave", "Nombre", "Distrito", "Domicilio", "Telefono"]
 
 app = typer.Typer()
 
@@ -21,18 +22,27 @@ def consultar(
 ):
     """Consultar centros de trabajo"""
     rich.print("Consultar centros de trabajo...")
+
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if domicilio_id is not None:
+        parametros["domicilio_id"] = domicilio_id
     try:
-        respuesta = get_centros_trabajos(
-            distrito_id=distrito_id,
-            domicilio_id=domicilio_id,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="centros_trabajos",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Mostrar la tabla
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Clave", "Nombre", "Distrito", "Domicilio", "Telefono")
+    table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
@@ -43,4 +53,6 @@ def consultar(
             registro["telefono"],
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] centros de trabajo")

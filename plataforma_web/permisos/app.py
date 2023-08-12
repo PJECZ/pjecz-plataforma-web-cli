@@ -4,10 +4,9 @@ CLI Permisos App
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
-
-from .request_api import get_permisos
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 app = typer.Typer()
 
@@ -15,22 +14,29 @@ app = typer.Typer()
 @app.command()
 def consultar(
     modulo_id: int = None,
+    rol_id: int = None,
     limit: int = LIMIT,
     offset: int = 0,
-    rol_id: int = None,
 ):
     """Consultar permisos"""
     rich.print("Consultar permisos...")
+
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if modulo_id is not None:
+        parametros["modulo_id"] = modulo_id
+    if rol_id is not None:
+        parametros["rol_id"] = rol_id
     try:
-        respuesta = get_permisos(
-            modulo_id=modulo_id,
-            limit=limit,
-            offset=offset,
-            rol_id=rol_id,
+        respuesta = requests_get(
+            subdirectorio="permisos",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table("ID", "Rol", "Modulo", "Nivel")
     for registro in respuesta["items"]:
@@ -41,4 +47,6 @@ def consultar(
             str(registro["nivel"]),
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] permisos")

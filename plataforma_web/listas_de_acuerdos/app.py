@@ -8,11 +8,9 @@ import time
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SLEEP
-
-from .request_api import get_listas_de_acuerdos, get_listas_de_acuerdos_sintetizar_por_creado
-from .send_messages import send_creadas
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Archivo"]
 
@@ -35,21 +33,30 @@ def consultar(
     """Consultar listas de acuerdos"""
     rich.print("Consultar listas de acuerdos...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if autoridad_id is not None:
+        parametros["autoridad_id"] = autoridad_id
+    if autoridad_clave is not None:
+        parametros["autoridad_clave"] = autoridad_clave
+    if creado is not None:
+        parametros["creado"] = creado
+    if creado_desde is not None:
+        parametros["creado_desde"] = creado_desde
+    if creado_hasta is not None:
+        parametros["creado_hasta"] = creado_hasta
+    if fecha is not None:
+        parametros["fecha"] = fecha
+    if fecha_desde is not None:
+        parametros["fecha_desde"] = fecha_desde
+    if fecha_hasta is not None:
+        parametros["fecha_hasta"] = fecha_hasta
     try:
-        respuesta = get_listas_de_acuerdos(
-            autoridad_id=autoridad_id,
-            autoridad_clave=autoridad_clave,
-            creado=creado,
-            creado_desde=creado_desde,
-            creado_hasta=creado_hasta,
-            fecha=fecha,
-            fecha_desde=fecha_desde,
-            fecha_hasta=fecha_hasta,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="listas_de_acuerdos",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -75,7 +82,16 @@ def consultar(
 
 
 @app.command()
-def guardar():
+def guardar(
+    autoridad_id: int = None,
+    autoridad_clave: str = None,
+    creado: str = None,
+    creado_desde: str = None,
+    creado_hasta: str = None,
+    fecha: str = None,
+    fecha_desde: str = None,
+    fecha_hasta: str = None,
+):
     """Guardar listas de acuerdos en un archivo CSV"""
     rich.print("Guardar listas de acuerdos...")
 
@@ -89,12 +105,29 @@ def guardar():
         escritor.writerow(encabezados)
         offset = 0
         while True:
+            parametros = {"limit": LIMIT, "offset": offset}
+            if autoridad_id is not None:
+                parametros["autoridad_id"] = autoridad_id
+            if autoridad_clave is not None:
+                parametros["autoridad_clave"] = autoridad_clave
+            if creado is not None:
+                parametros["creado"] = creado
+            if creado_desde is not None:
+                parametros["creado_desde"] = creado_desde
+            if creado_hasta is not None:
+                parametros["creado_hasta"] = creado_hasta
+            if fecha is not None:
+                parametros["fecha"] = fecha
+            if fecha_desde is not None:
+                parametros["fecha_desde"] = fecha_desde
+            if fecha_hasta is not None:
+                parametros["fecha_hasta"] = fecha_hasta
             try:
-                respuesta = get_listas_de_acuerdos(
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="listas_de_acuerdos",
+                    parametros=parametros,
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:
@@ -117,71 +150,3 @@ def guardar():
 
     # Mensaje de termino
     rich.print(f"Total: [green]{respuesta['total']}[/green] listas de acuerdos guardados en el archivo {nombre_archivo_csv}")
-
-
-@app.command()
-def consultar_creadas(
-    creado: str,
-    distrito_id: int = None,
-    size: int = LIMIT,
-):
-    """Consultar listas de acuerdos sintetizados por creado"""
-    rich.print("Consultar listas de acuerdos sintetizados por creado")
-    try:
-        respuesta = get_listas_de_acuerdos_sintetizar_por_creado(
-            creado=creado,
-            distrito_id=distrito_id,
-            size=size,
-        )
-    except CLIAnyError as error:
-        typer.secho(str(error), fg=typer.colors.RED)
-        raise typer.Exit()
-    console = rich.console.Console()
-    table = rich.table.Table("A. Clave", "Distrito", "Autoridad", "ID", "Fecha", "Creado", "Archivo")
-    contador = 0
-    for registro in respuesta["items"]:
-        if registro["id"] == 0:
-            table.add_row(
-                registro["autoridad_clave"],
-                registro["distrito_nombre_corto"],
-                registro["autoridad_descripcion_corta"],
-                "ND",
-                "ND",
-                "ND",
-                "ND",
-            )
-            continue
-        creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
-        table.add_row(
-            registro["autoridad_clave"],
-            registro["distrito_nombre_corto"],
-            registro["autoridad_descripcion_corta"],
-            str(registro["id"]),
-            registro["fecha"],
-            creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-            registro["archivo"],
-        )
-        contador += 1
-    console.print(table)
-
-
-@app.command()
-def enviar_creadas(
-    creado: str,
-    email: str,
-    size: int = LIMIT,
-    test: bool = True,
-):
-    """Enviar listas de acuerdos sintetizados por creado"""
-    rich.print("Enviar listas de acuerdos sintetizados por creado")
-    try:
-        mensaje = send_creadas(
-            creado=creado,
-            email=email,
-            size=size,
-            test=test,
-        )
-    except CLIAnyError as error:
-        typer.secho(str(error), fg=typer.colors.RED)
-        raise typer.Exit()
-    rich.print(mensaje)
