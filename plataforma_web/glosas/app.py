@@ -1,9 +1,9 @@
 """
-CLI Edictos App
+CLI Glosas App
 """
 import csv
-import time
 from datetime import datetime
+import time
 
 import rich
 import typer
@@ -17,9 +17,9 @@ encabezados = [
     "Creado",
     "Autoridad",
     "Fecha",
+    "Tipo de Juicio",
     "Descripcion",
     "Expediente",
-    "No. Pub.",
     "Archivo",
 ]
 
@@ -39,8 +39,8 @@ def consultar(
     limit: int = LIMIT,
     offset: int = 0,
 ):
-    """Consultar edictos"""
-    rich.print("Consultar edictos...")
+    """Consultar glosas"""
+    rich.print("Consultar glosas...")
 
     # Consultar a la API
     parametros = {"limit": limit, "offset": offset}
@@ -62,7 +62,7 @@ def consultar(
         parametros["fecha_hasta"] = fecha_hasta
     try:
         respuesta = requests_get(
-            subdirectorio="edictos",
+            subdirectorio="glosas",
             parametros=parametros,
         )
     except MyAnyError as error:
@@ -81,15 +81,15 @@ def consultar(
             creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             registro["autoridad_clave"],
             registro["fecha"],
+            registro["tipo_juicio"],
             registro["descripcion"],
             registro["expediente"],
-            registro["numero_publicacion"],
             registro["archivo"],
         )
     console.print(table)
 
     # Mostrar el total
-    rich.print(f"Total: [green]{respuesta['total']}[/green] edictos")
+    rich.print(f"Total: [green]{respuesta['total']}[/green] glosas")
 
 
 @app.command()
@@ -103,12 +103,12 @@ def guardar(
     fecha_desde: str = None,
     fecha_hasta: str = None,
 ):
-    """Guardar edictos en un archivo CSV"""
-    rich.print("Guardar edictos...")
+    """Guardar glosas en un archivo CSV"""
+    rich.print("Guardar glosas...")
 
     # Definir el nombre del archivo CSV
     fecha_hora = datetime.now().strftime("%Y%m%d%H%M%S")
-    nombre_archivo_csv = f"edictos_{fecha_hora}.csv"
+    nombre_archivo_csv = f"glosas_{fecha_hora}.csv"
 
     # Guardar los datos en un archivo CSV haciendo bucle de consultas a la API
     with open(nombre_archivo_csv, "w", encoding="utf-8") as archivo:
@@ -135,7 +135,7 @@ def guardar(
                 parametros["fecha_hasta"] = fecha_hasta
             try:
                 respuesta = requests_get(
-                    subdirectorio="edictos",
+                    subdirectorio="glosas",
                     parametros=parametros,
                 )
             except MyAnyError as error:
@@ -149,17 +149,17 @@ def guardar(
                         creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                         registro["autoridad_clave"],
                         registro["fecha"],
+                        registro["tipo_juicio"],
                         registro["descripcion"],
                         registro["expediente"],
-                        registro["numero_publicacion"],
                         registro["archivo"],
                     ]
                 )
             offset += LIMIT
             if offset >= respuesta["total"]:
                 break
-            rich.print(f"Van [green]{offset}[/green] edictos...")
+            rich.print(f"Van [green]{offset}[/green] glosas...")
             time.sleep(SLEEP)
 
     # Mensaje de termino
-    rich.print(f"Total: [green]{respuesta['total']}[/green] edictos guardados en el archivo {nombre_archivo_csv}")
+    rich.print(f"Total: [green]{respuesta['total']}[/green] glosas guardados en el archivo {nombre_archivo_csv}")

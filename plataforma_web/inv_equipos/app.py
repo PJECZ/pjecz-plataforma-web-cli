@@ -2,8 +2,8 @@
 CLI Inv Equipos App
 """
 import csv
-from datetime import datetime
 import time
+from datetime import datetime
 
 import rich
 import typer
@@ -195,8 +195,8 @@ def guardar(
             for registro in respuesta["items"]:
                 escritor.writerow(
                     [
-                        registro["id"],
-                        registro["inv_custodia_id"],
+                        str(registro["id"]),
+                        str(registro["inv_custodia_id"]),
                         registro["usuario_email"],
                         registro["inv_custodia_nombre_completo"],
                         registro["distrito_clave"],

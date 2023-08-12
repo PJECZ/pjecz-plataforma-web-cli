@@ -8,8 +8,6 @@ from config.settings import LIMIT
 from lib.exceptions import MyAnyError
 from lib.requests import requests_get
 
-encabezados = ["ID", "Clave", "Nombre", "Distrito", "Domicilio", "Telefono"]
-
 app = typer.Typer()
 
 
@@ -40,9 +38,7 @@ def consultar(
 
     # Mostrar la tabla
     console = rich.console.Console()
-    table = rich.table.Table()
-    for enca in encabezados:
-        table.add_column(enca)
+    table = rich.table.Table("ID", "Clave", "Nombre", "Distrito", "Domicilio", "Telefono")
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),

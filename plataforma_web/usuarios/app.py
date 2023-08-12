@@ -2,8 +2,8 @@
 CLI Usuarios App
 """
 import csv
-from datetime import datetime
 import time
+from datetime import datetime
 
 import rich
 import typer
@@ -12,7 +12,17 @@ from config.settings import LIMIT, SLEEP
 from lib.exceptions import MyAnyError
 from lib.requests import requests_get
 
-encabezados = ["ID", "Distrito", "Autoridad", "Oficina", "email", "Nombres", "A. Paterno", "A. Materno", "Workspace"]
+encabezados = [
+    "ID",
+    "Distrito",
+    "Autoridad",
+    "Oficina",
+    "email",
+    "Nombres",
+    "A. Paterno",
+    "A. Materno",
+    "Workspace",
+]
 
 app = typer.Typer()
 
@@ -117,7 +127,7 @@ def guardar(
             for registro in respuesta["items"]:
                 escritor.writerow(
                     [
-                        registro["id"],
+                        str(registro["id"]),
                         registro["distrito_clave"],
                         registro["autoridad_clave"],
                         registro["oficina_clave"],
