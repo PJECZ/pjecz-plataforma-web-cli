@@ -1,5 +1,5 @@
 """
-CLI Sentencias App
+CLI Glosas App
 """
 import csv
 from datetime import datetime
@@ -16,13 +16,10 @@ encabezados = [
     "ID",
     "Creado",
     "Autoridad",
-    "Materia",
-    "Tipo de Juicio",
-    "Sentencia",
-    "Sentencia F.",
-    "Expediente",
     "Fecha",
-    "Es P.G.",
+    "Tipo de Juicio",
+    "Descripcion",
+    "Expediente",
     "Archivo",
 ]
 
@@ -39,12 +36,11 @@ def consultar(
     fecha: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
-    materia_tipo_juicio_id: int = None,
     limit: int = LIMIT,
     offset: int = 0,
 ):
-    """Consultar sentencias"""
-    rich.print("Consultar sentencias...")
+    """Consultar glosas"""
+    rich.print("Consultar glosas...")
 
     # Consultar a la API
     parametros = {"limit": limit, "offset": offset}
@@ -64,11 +60,9 @@ def consultar(
         parametros["fecha_desde"] = fecha_desde
     if fecha_hasta is not None:
         parametros["fecha_hasta"] = fecha_hasta
-    if materia_tipo_juicio_id is not None:
-        parametros["materia_tipo_juicio_id"] = materia_tipo_juicio_id
     try:
         respuesta = requests_get(
-            subdirectorio="sentencias",
+            subdirectorio="glosas",
             parametros=parametros,
         )
     except MyAnyError as error:
@@ -78,25 +72,24 @@ def consultar(
     # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
     for registro in respuesta["items"]:
         creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
         table.add_row(
             str(registro["id"]),
             creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             registro["autoridad_clave"],
-            registro["materia_nombre"],
-            registro["materia_tipo_juicio_descripcion"],
-            registro["sentencia"],
-            registro["sentencia_fecha"],
-            registro["expediente"],
             registro["fecha"],
-            "SI" if registro["es_perspectiva_genero"] else "NO",
+            registro["tipo_juicio"],
+            registro["descripcion"],
+            registro["expediente"],
             registro["archivo"],
         )
     console.print(table)
 
     # Mostrar el total
-    rich.print(f"Total: [green]{respuesta['total']}[/green] sentencias")
+    rich.print(f"Total: [green]{respuesta['total']}[/green] glosas")
 
 
 @app.command()
@@ -109,14 +102,13 @@ def guardar(
     fecha: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
-    materia_tipo_juicio_id: int = None,
 ):
-    """Guardar sentencias en un archivo CSV"""
-    rich.print("Guardar sentencias...")
+    """Guardar glosas en un archivo CSV"""
+    rich.print("Guardar glosas...")
 
     # Definir el nombre del archivo CSV
     fecha_hora = datetime.now().strftime("%Y%m%d%H%M%S")
-    nombre_archivo_csv = f"sentencias_{fecha_hora}.csv"
+    nombre_archivo_csv = f"glosas_{fecha_hora}.csv"
 
     # Guardar los datos en un archivo CSV haciendo bucle de consultas a la API
     with open(nombre_archivo_csv, "w", encoding="utf-8") as archivo:
@@ -141,11 +133,9 @@ def guardar(
                 parametros["fecha_desde"] = fecha_desde
             if fecha_hasta is not None:
                 parametros["fecha_hasta"] = fecha_hasta
-            if materia_tipo_juicio_id is not None:
-                parametros["materia_tipo_juicio_id"] = materia_tipo_juicio_id
             try:
                 respuesta = requests_get(
-                    subdirectorio="sentencias",
+                    subdirectorio="glosas",
                     parametros=parametros,
                 )
             except MyAnyError as error:
@@ -157,15 +147,19 @@ def guardar(
                     [
                         registro["id"],
                         creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-                        registro["clave"],
+                        registro["autoridad_clave"],
+                        registro["fecha"],
+                        registro["tipo_juicio"],
                         registro["descripcion"],
+                        registro["expediente"],
+                        registro["archivo"],
                     ]
                 )
             offset += LIMIT
             if offset >= respuesta["total"]:
                 break
-            rich.print(f"Van [green]{offset}[/green] sentencias...")
+            rich.print(f"Van [green]{offset}[/green] glosas...")
             time.sleep(SLEEP)
 
     # Mensaje de termino
-    rich.print(f"Total: [green]{respuesta['total']}[/green] sentencias guardados en el archivo {nombre_archivo_csv}")
+    rich.print(f"Total: [green]{respuesta['total']}[/green] glosas guardados en el archivo {nombre_archivo_csv}")

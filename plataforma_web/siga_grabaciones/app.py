@@ -10,7 +10,16 @@ from config.settings import LIMIT
 from lib.exceptions import MyAnyError
 from lib.requests import requests_get
 
-encabezados = ["ID", "Archivo Nombre", "Inicio", "Sala", "Autoridad", "Expediente", "Duración", "Tamaño"]
+encabezados = [
+    "ID",
+    "Archivo Nombre",
+    "Inicio",
+    "Sala",
+    "Autoridad",
+    "Expediente",
+    "Duración",
+    "Tamaño",
+]
 
 app = typer.Typer()
 

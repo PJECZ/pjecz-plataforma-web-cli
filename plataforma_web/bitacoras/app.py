@@ -3,11 +3,12 @@ CLI Bitacoras App
 """
 import csv
 from datetime import datetime
+import time
 
 import rich
 import typer
 
-from config.settings import LIMIT
+from config.settings import LIMIT, SLEEP
 from lib.exceptions import MyAnyError
 from lib.requests import requests_get
 
@@ -117,6 +118,8 @@ def guardar(
             offset += LIMIT
             if offset >= respuesta["total"]:
                 break
+            rich.print(f"Van [green]{offset}[/green] bitacoras...")
+            time.sleep(SLEEP)
 
     # Mensaje de termino
     rich.print(f"Total: [green]{respuesta['total']}[/green] bitacoras guardados en el archivo {nombre_archivo_csv}")

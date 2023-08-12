@@ -12,7 +12,17 @@ from config.settings import LIMIT, SLEEP
 from lib.exceptions import MyAnyError
 from lib.requests import requests_get
 
-encabezados = ["ID", "Distrito", "Autoridad", "Oficina", "email", "Nombres", "A. Paterno", "A. Materno", "Workspace"]
+encabezados = [
+    "ID",
+    "Distrito",
+    "Autoridad",
+    "Oficina",
+    "email",
+    "Nombres",
+    "A. Paterno",
+    "A. Materno",
+    "Workspace",
+]
 
 app = typer.Typer()
 

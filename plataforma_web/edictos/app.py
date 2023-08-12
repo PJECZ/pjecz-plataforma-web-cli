@@ -12,7 +12,16 @@ from config.settings import LIMIT, SLEEP
 from lib.exceptions import MyAnyError
 from lib.requests import requests_get
 
-encabezados = ["ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Expediente", "No. Pub.", "Archivo"]
+encabezados = [
+    "ID",
+    "Creado",
+    "Autoridad",
+    "Fecha",
+    "Descripcion",
+    "Expediente",
+    "No. Pub.",
+    "Archivo",
+]
 
 app = typer.Typer()
 
@@ -21,6 +30,9 @@ app = typer.Typer()
 def consultar(
     autoridad_id: int = None,
     autoridad_clave: str = None,
+    creado: str = None,
+    creado_desde: str = None,
+    creado_hasta: str = None,
     fecha: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
@@ -36,6 +48,12 @@ def consultar(
         parametros["autoridad_id"] = autoridad_id
     if autoridad_clave is not None:
         parametros["autoridad_clave"] = autoridad_clave
+    if creado is not None:
+        parametros["creado"] = creado
+    if creado_desde is not None:
+        parametros["creado_desde"] = creado_desde
+    if creado_hasta is not None:
+        parametros["creado_hasta"] = creado_hasta
     if fecha is not None:
         parametros["fecha"] = fecha
     if fecha_desde is not None:
@@ -78,6 +96,9 @@ def consultar(
 def guardar(
     autoridad_id: int = None,
     autoridad_clave: str = None,
+    creado: str = None,
+    creado_desde: str = None,
+    creado_hasta: str = None,
     fecha: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
@@ -95,22 +116,26 @@ def guardar(
         escritor.writerow(encabezados)
         offset = 0
         while True:
-            parametros = {
-                k: v
-                for k, v in {
-                    "autoridad_id": autoridad_id,
-                    "autoridad_clave": autoridad_clave,
-                    "fecha": fecha,
-                    "fecha_desde": fecha_desde,
-                    "fecha_hasta": fecha_hasta,
-                    "limit": LIMIT,
-                    "offset": offset,
-                }.items()
-                if v is not None
-            }
+            parametros = {"limit": LIMIT, "offset": offset}
+            if autoridad_id is not None:
+                parametros["autoridad_id"] = autoridad_id
+            if autoridad_clave is not None:
+                parametros["autoridad_clave"] = autoridad_clave
+            if creado is not None:
+                parametros["creado"] = creado
+            if creado_desde is not None:
+                parametros["creado_desde"] = creado_desde
+            if creado_hasta is not None:
+                parametros["creado_hasta"] = creado_hasta
+            if fecha is not None:
+                parametros["fecha"] = fecha
+            if fecha_desde is not None:
+                parametros["fecha_desde"] = fecha_desde
+            if fecha_hasta is not None:
+                parametros["fecha_hasta"] = fecha_hasta
             try:
                 respuesta = requests_get(
-                    subdirectorio="distritos",
+                    subdirectorio="edictos",
                     parametros=parametros,
                 )
             except MyAnyError as error:
