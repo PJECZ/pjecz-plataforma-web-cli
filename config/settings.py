@@ -9,13 +9,12 @@ import pytz
 load_dotenv()
 
 # Plataforma Web API key
-HOST = os.getenv("HOST", "")
-BASE_URL = HOST + "/v3"
 API_KEY = os.getenv("API_KEY", "")
+API_URL = os.getenv("API_URL", "")
 
 # Citas V2 API key
 CITAS_V2_HOST = os.getenv("CITAS_V2_HOST", "")
-CITAS_V2_BASE_URL = CITAS_V2_HOST + "/v3"
+CITAS_V2_API_URL = CITAS_V2_HOST + "/v3"
 CITAS_V2_API_KEY = os.getenv("CITAS_V2_API_KEY", "")
 
 # Parametros limit, timeout y sleep en segundos

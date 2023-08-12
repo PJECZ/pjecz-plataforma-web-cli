@@ -7,10 +7,9 @@ from datetime import datetime
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
-
-from .request_api import get_bitacoras
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Creado", "Modulo", "email", "Descripcion"]
 
@@ -29,17 +28,22 @@ def consultar(
     """Consultar bitacoras"""
     rich.print("Consultar bitacoras...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if modulo_id is not None:
+        parametros["modulo_id"] = modulo_id
+    if modulo_nombre is not None:
+        parametros["modulo_nombre"] = modulo_nombre
+    if usuario_id is not None:
+        parametros["usuario_id"] = usuario_id
+    if usuario_email is not None:
+        parametros["usuario_email"] = usuario_email
     try:
-        respuesta = get_bitacoras(
-            modulo_id=modulo_id,
-            modulo_nombre=modulo_nombre,
-            usuario_id=usuario_id,
-            usuario_email=usuario_email,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="bitacoras",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -83,16 +87,21 @@ def guardar(
         escritor.writerow(encabezados)
         offset = 0
         while True:
+            parametros = {"limit": LIMIT, "offset": offset}
+            if modulo_id is not None:
+                parametros["modulo_id"] = modulo_id
+            if modulo_nombre is not None:
+                parametros["modulo_nombre"] = modulo_nombre
+            if usuario_id is not None:
+                parametros["usuario_id"] = usuario_id
+            if usuario_email is not None:
+                parametros["usuario_email"] = usuario_email
             try:
-                respuesta = get_bitacoras(
-                    modulo_id=modulo_id,
-                    modulo_nombre=modulo_nombre,
-                    usuario_id=usuario_id,
-                    usuario_email=usuario_email,
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="bitacoras",
+                    parametros=parametros,
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:

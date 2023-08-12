@@ -4,10 +4,9 @@ CLI Modulos App
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
-
-from .request_api import get_modulos
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 app = typer.Typer()
 
@@ -19,14 +18,19 @@ def consultar(
 ):
     """Consultar modulos"""
     rich.print("Consultar modulos...")
+
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
     try:
-        respuesta = get_modulos(
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="modulos",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table("ID", "Nombre", "Nombre corto", "Icono", "Ruta", "En N.")
     for registro in respuesta["items"]:
@@ -39,4 +43,6 @@ def consultar(
             "SI" if registro["en_navegacion"] else "NO",
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] modulos")

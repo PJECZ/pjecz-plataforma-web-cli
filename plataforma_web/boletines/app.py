@@ -6,10 +6,9 @@ from datetime import datetime
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
-
-from .request_api import get_boletines
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Envío", "Asunto", "Puntero", "Término"]
 
@@ -27,16 +26,20 @@ def consultar(
     """Consultar boletines"""
     rich.print("Consultar boletines...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if estado is not None:
+        parametros["estado"] = estado
+    if envio_programado_desde is not None:
+        parametros["envio_programado_desde"] = envio_programado_desde
+    if envio_programado_hasta is not None:
+        parametros["envio_programado_hasta"] = envio_programado_hasta
     try:
-        respuesta = get_boletines(
-            estado=estado,
-            envio_programado_desde=envio_programado_desde,
-            envio_programado_hasta=envio_programado_hasta,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="boletines",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 

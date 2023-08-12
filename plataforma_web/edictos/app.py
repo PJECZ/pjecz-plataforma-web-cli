@@ -8,10 +8,9 @@ import time
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SLEEP
-
-from .request_api import get_edictos
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Creado", "Autoridad", "Fecha", "Descripcion", "Expediente", "No. Pub.", "Archivo"]
 
@@ -31,18 +30,24 @@ def consultar(
     """Consultar edictos"""
     rich.print("Consultar edictos...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if autoridad_id is not None:
+        parametros["autoridad_id"] = autoridad_id
+    if autoridad_clave is not None:
+        parametros["autoridad_clave"] = autoridad_clave
+    if fecha is not None:
+        parametros["fecha"] = fecha
+    if fecha_desde is not None:
+        parametros["fecha_desde"] = fecha_desde
+    if fecha_hasta is not None:
+        parametros["fecha_hasta"] = fecha_hasta
     try:
-        respuesta = get_edictos(
-            autoridad_id=autoridad_id,
-            autoridad_clave=autoridad_clave,
-            fecha=fecha,
-            fecha_desde=fecha_desde,
-            fecha_hasta=fecha_hasta,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="edictos",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -90,21 +95,29 @@ def guardar(
         escritor.writerow(encabezados)
         offset = 0
         while True:
+            parametros = {
+                k: v
+                for k, v in {
+                    "autoridad_id": autoridad_id,
+                    "autoridad_clave": autoridad_clave,
+                    "fecha": fecha,
+                    "fecha_desde": fecha_desde,
+                    "fecha_hasta": fecha_hasta,
+                    "limit": LIMIT,
+                    "offset": offset,
+                }.items()
+                if v is not None
+            }
             try:
-                respuesta = get_edictos(
-                    autoridad_id=autoridad_id,
-                    autoridad_clave=autoridad_clave,
-                    fecha=fecha,
-                    fecha_desde=fecha_desde,
-                    fecha_hasta=fecha_hasta,
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="distritos",
+                    parametros=parametros,
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:
-                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")  # %z: UTC offset in the form +HHMM or -HHMM (empty string if the object is naive).
+                creado = datetime.strptime(registro["creado"], "%Y-%m-%dT%H:%M:%S.%f%z")
                 escritor.writerow(
                     [
                         registro["id"],

@@ -8,10 +8,9 @@ import time
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SLEEP
-
-from .request_api import get_inv_custodias
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Usuario e-mail", "Nombre completo", "Distrito", "Edificio", "Oficina"]
 
@@ -32,19 +31,26 @@ def consultar(
     """Consultar custodias"""
     rich.print("Consultar custodias...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
+    if fecha_desde is not None:
+        parametros["fecha_desde"] = fecha_desde
+    if fecha_hasta is not None:
+        parametros["fecha_hasta"] = fecha_hasta
+    if usuario_id is not None:
+        parametros["usuario_id"] = usuario_id
+    if usuario_email is not None:
+        parametros["usuario_email"] = usuario_email
     try:
-        respuesta = get_inv_custodias(
-            distrito_id=distrito_id,
-            distrito_clave=distrito_clave,
-            fecha_desde=fecha_desde,
-            fecha_hasta=fecha_hasta,
-            usuario_id=usuario_id,
-            usuario_email=usuario_email,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="inv_custodias",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -90,18 +96,25 @@ def guardar(
         escritor.writerow(encabezados)
         offset = 0
         while True:
+            parametros = {"limit": LIMIT, "offset": offset}
+            if distrito_id is not None:
+                parametros["distrito_id"] = distrito_id
+            if distrito_clave is not None:
+                parametros["distrito_clave"] = distrito_clave
+            if fecha_desde is not None:
+                parametros["fecha_desde"] = fecha_desde
+            if fecha_hasta is not None:
+                parametros["fecha_hasta"] = fecha_hasta
+            if usuario_id is not None:
+                parametros["usuario_id"] = usuario_id
+            if usuario_email is not None:
+                parametros["usuario_email"] = usuario_email
             try:
-                respuesta = get_inv_custodias(
-                    distrito_id=distrito_id,
-                    distrito_clave=distrito_clave,
-                    fecha_desde=fecha_desde,
-                    fecha_hasta=fecha_hasta,
-                    usuario_id=usuario_id,
-                    usuario_email=usuario_email,
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="inv_custodias",
+                    parametros=parametros,
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:

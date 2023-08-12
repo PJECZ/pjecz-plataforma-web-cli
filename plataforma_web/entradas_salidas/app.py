@@ -1,16 +1,14 @@
 """
 CLI Entradas-Salidas App
 """
-import csv
 from datetime import datetime
 
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
-
-from .request_api import get_entradas_salidas
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Creado", "email", "Tipo", "Direccion IP"]
 
@@ -27,15 +25,18 @@ def consultar(
     """Consultar entradas-salidas"""
     rich.print("Consultar entradas-salidas...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if usuario_id is not None:
+        parametros["usuario_id"] = usuario_id
+    if usuario_email is not None:
+        parametros["usuario_email"] = usuario_email
     try:
-        respuesta = get_entradas_salidas(
-            usuario_id=usuario_id,
-            usuario_email=usuario_email,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="entradas_salidas",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 

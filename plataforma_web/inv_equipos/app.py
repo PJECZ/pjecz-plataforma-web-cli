@@ -8,12 +8,31 @@ import time
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT, SLEEP
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
-from .request_api import get_inv_equipos
-
-encabezados = ["ID", "Custodia", "Usuario e-mail", "Nombre completo", "Distrito", "Edificio", "Oficina", "Marca", "Modelo", "Red", "F. Fab.", "No. Serie", "No. Inv.", "Tipo", "D. IP", "Mac Address", "Disco Duro", "Memoria", "Procesador"]
+encabezados = [
+    "ID",
+    "Custodia",
+    "Usuario e-mail",
+    "Nombre completo",
+    "Distrito",
+    "Edificio",
+    "Oficina",
+    "Marca",
+    "Modelo",
+    "Red",
+    "F. Fab.",
+    "No. Serie",
+    "No. Inv.",
+    "Tipo",
+    "D. IP",
+    "Mac Address",
+    "Disco Duro",
+    "Memoria",
+    "Procesador",
+]
 
 app = typer.Typer()
 
@@ -39,26 +58,40 @@ def consultar(
     """Consultar equipos"""
     rich.print("Consultar equipos...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if creado is not None:
+        parametros["creado"] = creado
+    if creado_desde is not None:
+        parametros["creado_desde"] = creado_desde
+    if creado_hasta is not None:
+        parametros["creado_hasta"] = creado_hasta
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
+    if fecha_fabricacion_desde is not None:
+        parametros["fecha_fabricacion_desde"] = fecha_fabricacion_desde
+    if fecha_fabricacion_hasta is not None:
+        parametros["fecha_fabricacion_hasta"] = fecha_fabricacion_hasta
+    if inv_custodia_id is not None:
+        parametros["inv_custodia_id"] = inv_custodia_id
+    if inv_modelo_id is not None:
+        parametros["inv_modelo_id"] = inv_modelo_id
+    if inv_red_id is not None:
+        parametros["inv_red_id"] = inv_red_id
+    if oficina_id is not None:
+        parametros["oficina_id"] = oficina_id
+    if oficina_clave is not None:
+        parametros["oficina_clave"] = oficina_clave
+    if tipo is not None:
+        parametros["tipo"] = tipo
     try:
-        respuesta = get_inv_equipos(
-            creado=creado,
-            creado_desde=creado_desde,
-            creado_hasta=creado_hasta,
-            distrito_id=distrito_id,
-            distrito_clave=distrito_clave,
-            fecha_fabricacion_desde=fecha_fabricacion_desde,
-            fecha_fabricacion_hasta=fecha_fabricacion_hasta,
-            inv_custodia_id=inv_custodia_id,
-            inv_modelo_id=inv_modelo_id,
-            inv_red_id=inv_red_id,
-            oficina_id=oficina_id,
-            oficina_clave=oficina_clave,
-            tipo=tipo,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="inv_equipos",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 
@@ -100,6 +133,8 @@ def guardar(
     creado: str = None,
     creado_desde: str = None,
     creado_hasta: str = None,
+    distrito_id: int = None,
+    distrito_clave: str = None,
     fecha_fabricacion_desde: str = None,
     fecha_fabricacion_hasta: str = None,
     inv_custodia_id: int = None,
@@ -122,23 +157,39 @@ def guardar(
         escritor.writerow(encabezados)
         offset = 0
         while True:
+            parametros = {"limit": LIMIT, "offset": offset}
+            if creado is not None:
+                parametros["creado"] = creado
+            if creado_desde is not None:
+                parametros["creado_desde"] = creado_desde
+            if creado_hasta is not None:
+                parametros["creado_hasta"] = creado_hasta
+            if distrito_id is not None:
+                parametros["distrito_id"] = distrito_id
+            if distrito_clave is not None:
+                parametros["distrito_clave"] = distrito_clave
+            if fecha_fabricacion_desde is not None:
+                parametros["fecha_fabricacion_desde"] = fecha_fabricacion_desde
+            if fecha_fabricacion_hasta is not None:
+                parametros["fecha_fabricacion_hasta"] = fecha_fabricacion_hasta
+            if inv_custodia_id is not None:
+                parametros["inv_custodia_id"] = inv_custodia_id
+            if inv_modelo_id is not None:
+                parametros["inv_modelo_id"] = inv_modelo_id
+            if inv_red_id is not None:
+                parametros["inv_red_id"] = inv_red_id
+            if oficina_id is not None:
+                parametros["oficina_id"] = oficina_id
+            if oficina_clave is not None:
+                parametros["oficina_clave"] = oficina_clave
+            if tipo is not None:
+                parametros["tipo"] = tipo
             try:
-                respuesta = get_inv_equipos(
-                    creado=creado,
-                    creado_desde=creado_desde,
-                    creado_hasta=creado_hasta,
-                    fecha_fabricacion_desde=fecha_fabricacion_desde,
-                    fecha_fabricacion_hasta=fecha_fabricacion_hasta,
-                    inv_custodia_id=inv_custodia_id,
-                    inv_modelo_id=inv_modelo_id,
-                    inv_red_id=inv_red_id,
-                    oficina_id=oficina_id,
-                    oficina_clave=oficina_clave,
-                    tipo=tipo,
-                    limit=LIMIT,
-                    offset=offset,
+                respuesta = requests_get(
+                    subdirectorio="inv_equipos",
+                    parametros=parametros,
                 )
-            except CLIAnyError as error:
+            except MyAnyError as error:
                 typer.secho(str(error), fg=typer.colors.RED)
                 raise typer.Exit()
             for registro in respuesta["items"]:

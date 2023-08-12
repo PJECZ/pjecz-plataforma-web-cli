@@ -1,16 +1,12 @@
 """
 CLI SIGA Salas App
 """
-import csv
-from datetime import datetime
-
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
-
-from .request_api import get_siga_salas
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 encabezados = ["ID", "Clave", "Distrito", "Edificio", "Direccion IP", "Direccion NVR", "Estado"]
 
@@ -28,16 +24,20 @@ def consultar(
     """Consultar salas"""
     rich.print("Consultar salas...")
 
-    # Solicitar datos
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if distrito_id is not None:
+        parametros["distrito_id"] = distrito_id
+    if distrito_clave is not None:
+        parametros["distrito_clave"] = distrito_clave
+    if domicilio_id is not None:
+        parametros["domicilio_id"] = domicilio_id
     try:
-        respuesta = get_siga_salas(
-            distrito_id=distrito_id,
-            distrito_clave=distrito_clave,
-            domicilio_id=domicilio_id,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="siga_grabaciones",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
 

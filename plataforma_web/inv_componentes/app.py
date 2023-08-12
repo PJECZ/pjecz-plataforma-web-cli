@@ -4,10 +4,11 @@ CLI Inv Componentes App
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
-from .request_api import get_inv_componentes
+encabezados = ["ID", "Categoria", "Equipo ID", "Equipo Desc.", "Descripcion", "Cantidad", "Generacion", "Version"]
 
 app = typer.Typer()
 
@@ -22,19 +23,29 @@ def consultar(
 ):
     """Consultar componentes"""
     rich.print("Consultar componentes...")
+
+    # Consultar a la API
+    parametros = {"limit": limit, "offset": offset}
+    if generacion is not None:
+        parametros["generacion"] = generacion
+    if inv_categoria_id is not None:
+        parametros["inv_categoria_id"] = inv_categoria_id
+    if inv_equipo_id is not None:
+        parametros["inv_equipo_id"] = inv_equipo_id
     try:
-        respuesta = get_inv_componentes(
-            generacion=generacion,
-            inv_categoria_id=inv_categoria_id,
-            inv_equipo_id=inv_equipo_id,
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="inv_componentes",
+            parametros=parametros,
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Mostrar la tabla
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Categoria", "Equipo ID", "Equipo Desc.", "Descripcion", "Cantidad", "Generacion", "Version")
+    table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
@@ -47,4 +58,6 @@ def consultar(
             registro["version"],
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] componentes")

@@ -4,10 +4,9 @@ CLI Inv Categorias App
 import rich
 import typer
 
-from common.exceptions import CLIAnyError
 from config.settings import LIMIT
-
-from .request_api import get_inv_categorias
+from lib.exceptions import MyAnyError
+from lib.requests import requests_get
 
 app = typer.Typer()
 
@@ -19,14 +18,18 @@ def consultar(
 ):
     """Consultar categorias"""
     rich.print("Consultar categorias...")
+
+    # Consultar las categorias
     try:
-        respuesta = get_inv_categorias(
-            limit=limit,
-            offset=offset,
+        respuesta = requests_get(
+            subdirectorio="inv_categorias",
+            parametros={"limit": limit, "offset": offset},
         )
-    except CLIAnyError as error:
+    except MyAnyError as error:
         typer.secho(str(error), fg=typer.colors.RED)
         raise typer.Exit()
+
+    # Mostrar la tabla
     console = rich.console.Console()
     table = rich.table.Table("ID", "Nombre")
     for registro in respuesta["items"]:
@@ -35,4 +38,6 @@ def consultar(
             registro["nombre"],
         )
     console.print(table)
+
+    # Mostrar el total
     rich.print(f"Total: [green]{respuesta['total']}[/green] categorias")
