@@ -3,6 +3,7 @@ Command Line Interface
 """
 import typer
 
+from plataforma_web.audiencias.app import app as audiencias_app
 from plataforma_web.autoridades.app import app as autoridades_app
 from plataforma_web.bitacoras.app import app as bitacoras_app
 from plataforma_web.boletines.app import app as boletines_app
@@ -34,6 +35,7 @@ from plataforma_web.siga_salas.app import app as siga_salas_app
 from plataforma_web.usuarios.app import app as usuarios_app
 
 app = typer.Typer()
+app.add_typer(audiencias_app, name="audiencias")
 app.add_typer(autoridades_app, name="autoridades")
 app.add_typer(bitacoras_app, name="bitacoras")
 app.add_typer(boletines_app, name="boletines")
