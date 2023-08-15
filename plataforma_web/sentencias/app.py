@@ -178,3 +178,51 @@ def guardar(
 
     # Mensaje de termino
     rich.print(f"Total: [green]{respuesta['total']}[/green] sentencias guardados en el archivo {nombre_archivo_csv}")
+
+
+@app.command()
+def mostrar_reporte_diario(
+    creado: str = None,
+):
+    """Mostrar reporte diario de sentencias"""
+    rich.print("Mostrar reporte diario de sentencias...")
+
+    # Consultar a la API
+    try:
+        respuesta = requests_get(
+            subdirectorio="sentencias/reporte_diario",
+            parametros={"creado": creado},
+        )
+    except MyAnyError as error:
+        typer.secho(str(error), fg=typer.colors.RED)
+        raise typer.Exit()
+
+    # Si el total es cero, mostrar mensaje y salir
+    if respuesta["total"] == 0:
+        rich.print(respuesta["message"])
+        raise typer.Exit()
+
+    # Mostrar la tabla
+    console = rich.console.Console()
+    table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
+    for registro in respuesta["items"]:
+        creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
+        table.add_row(
+            str(registro["id"]),
+            creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            registro["autoridad_clave"],
+            registro["materia_nombre"],
+            registro["materia_tipo_juicio_descripcion"],
+            registro["sentencia"],
+            registro["sentencia_fecha"],
+            registro["expediente"],
+            registro["fecha"],
+            "SI" if registro["es_perspectiva_genero"] else "NO",
+            registro["archivo"],
+        )
+    console.print(table)
+
+    # Mostrar el total
+    rich.print(f"Total: [green]{respuesta['total']}[/green] glosas")

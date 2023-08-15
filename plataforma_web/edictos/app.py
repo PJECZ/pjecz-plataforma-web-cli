@@ -145,7 +145,7 @@ def guardar(
                 creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
                 escritor.writerow(
                     [
-                        registro["id"],
+                        str(registro["id"]),
                         creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                         registro["autoridad_clave"],
                         registro["fecha"],
@@ -163,3 +163,48 @@ def guardar(
 
     # Mensaje de termino
     rich.print(f"Total: [green]{respuesta['total']}[/green] edictos guardados en el archivo {nombre_archivo_csv}")
+
+
+@app.command()
+def mostrar_reporte_diario(
+    creado: str = None,
+):
+    """Mostrar reporte diario de edictos"""
+    rich.print("Mostrar reporte diario de edictos...")
+
+    # Consultar a la API
+    try:
+        respuesta = requests_get(
+            subdirectorio="edictos/reporte_diario",
+            parametros={"creado": creado},
+        )
+    except MyAnyError as error:
+        typer.secho(str(error), fg=typer.colors.RED)
+        raise typer.Exit()
+
+    # Si el total es cero, mostrar mensaje y salir
+    if respuesta["total"] == 0:
+        rich.print(respuesta["message"])
+        raise typer.Exit()
+
+    # Mostrar la tabla
+    console = rich.console.Console()
+    table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
+    for registro in respuesta["items"]:
+        creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
+        table.add_row(
+            str(registro["id"]),
+            creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            registro["autoridad_clave"],
+            registro["fecha"],
+            registro["descripcion"],
+            registro["expediente"],
+            registro["numero_publicacion"],
+            registro["archivo"],
+        )
+    console.print(table)
+
+    # Mostrar el total
+    rich.print(f"Total: [green]{respuesta['total']}[/green] glosas")
