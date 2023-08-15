@@ -167,7 +167,7 @@ def guardar(
 
 @app.command()
 def mostrar_reporte_diario(
-    creado: str = None,
+    creado: str,
 ):
     """Mostrar reporte diario de glosas"""
     rich.print("Mostrar reporte diario de glosas...")
@@ -175,7 +175,7 @@ def mostrar_reporte_diario(
     # Consultar a la API
     try:
         respuesta = requests_get(
-            subdirectorio="listas_de_acuerdos/reporte_diario",
+            subdirectorio="glosas/reporte_diario",
             parametros={"creado": creado},
         )
     except MyAnyError as error:

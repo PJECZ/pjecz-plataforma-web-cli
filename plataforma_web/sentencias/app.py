@@ -182,7 +182,7 @@ def guardar(
 
 @app.command()
 def mostrar_reporte_diario(
-    creado: str = None,
+    creado: str,
 ):
     """Mostrar reporte diario de sentencias"""
     rich.print("Mostrar reporte diario de sentencias...")
