@@ -13,6 +13,7 @@ app = typer.Typer()
 
 @app.command()
 def consultar(
+    en_sentencias: bool = None,
     limit: int = LIMIT,
     offset: int = 0,
 ):
@@ -21,6 +22,8 @@ def consultar(
 
     # Consultar a la API
     parametros = {"limit": limit, "offset": offset}
+    if en_sentencias is not None:
+        parametros["en_sentencias"] = en_sentencias
     try:
         respuesta = requests_get(
             subdirectorio="materias",
@@ -32,12 +35,13 @@ def consultar(
 
     # Mostrar la tabla
     console = rich.console.Console()
-    table = rich.table.Table("ID", "Clave", "Nombre")
+    table = rich.table.Table("ID", "Clave", "Nombre", "En sentencias")
     for registro in respuesta["items"]:
         table.add_row(
             str(registro["id"]),
             registro["clave"],
             registro["nombre"],
+            "SI" if registro["en_sentencias"] else "",
         )
     console.print(table)
 
