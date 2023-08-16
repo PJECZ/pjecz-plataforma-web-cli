@@ -59,7 +59,7 @@
       "\tconsole.print(table)",
       "",
       "\t# Mostrar el total",
-      "\trich.print(f\"Total: [green]{respuesta['total']}[/green] ${3:plural}\")",
+      "\trich.print(f\"Total: [green]{respuesta['total']}[/green] ${2:plural}\")",
       ""
     ]
   },
@@ -86,7 +86,7 @@
       "\t\t\tparametros = {\"limit\": LIMIT, \"offset\": offset}",
       "\t\t\ttry:",
       "\t\t\t\trespuesta = requests_get(",
-      "\t\t\t\t\tsubdirectorio=\"${3:plural}\",",
+      "\t\t\t\t\tsubdirectorio=\"${2:plural}\",",
       "\t\t\t\t\tparametros=parametros,",
       "\t\t\t\t)",
       "\t\t\texcept MyAnyError as error:",

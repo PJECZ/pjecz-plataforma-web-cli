@@ -2,8 +2,8 @@
 CLI Glosas App
 """
 import csv
-from datetime import datetime
 import time
+from datetime import datetime
 
 import rich
 import typer
@@ -20,7 +20,7 @@ encabezados = [
     "Tipo de Juicio",
     "Descripcion",
     "Expediente",
-    "Archivo",
+    "Descargar URL",
 ]
 
 app = typer.Typer()
@@ -84,7 +84,7 @@ def consultar(
             registro["tipo_juicio"],
             registro["descripcion"],
             registro["expediente"],
-            registro["archivo"],
+            registro["descargar_url"],
         )
     console.print(table)
 
@@ -145,14 +145,14 @@ def guardar(
                 creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
                 escritor.writerow(
                     [
-                        registro["id"],
+                        str(registro["id"]),
                         creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                         registro["autoridad_clave"],
                         registro["fecha"],
                         registro["tipo_juicio"],
                         registro["descripcion"],
                         registro["expediente"],
-                        registro["archivo"],
+                        registro["descargar_url"],
                     ]
                 )
             offset += LIMIT
@@ -163,3 +163,48 @@ def guardar(
 
     # Mensaje de termino
     rich.print(f"Total: [green]{respuesta['total']}[/green] glosas guardados en el archivo {nombre_archivo_csv}")
+
+
+@app.command()
+def mostrar_reporte_diario(
+    creado: str,
+):
+    """Mostrar reporte diario de glosas"""
+    rich.print("Mostrar reporte diario de glosas...")
+
+    # Consultar a la API
+    try:
+        respuesta = requests_get(
+            subdirectorio="glosas/reporte_diario",
+            parametros={"creado": creado},
+        )
+    except MyAnyError as error:
+        typer.secho(str(error), fg=typer.colors.RED)
+        raise typer.Exit()
+
+    # Si el total es cero, mostrar mensaje y salir
+    if respuesta["total"] == 0:
+        rich.print(respuesta["message"])
+        raise typer.Exit()
+
+    # Mostrar la tabla
+    console = rich.console.Console()
+    table = rich.table.Table()
+    for enca in encabezados:
+        table.add_column(enca)
+    for registro in respuesta["items"]:
+        creado_datetime = datetime.fromisoformat(registro["creado"].replace("Z", "+00:00"))
+        table.add_row(
+            str(registro["id"]),
+            creado_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            registro["autoridad_clave"],
+            registro["fecha"],
+            registro["tipo_juicio"],
+            registro["descripcion"],
+            registro["expediente"],
+            registro["descargar_url"],
+        )
+    console.print(table)
+
+    # Mostrar el total
+    rich.print(f"Total: [green]{respuesta['total']}[/green] glosas")
