@@ -20,7 +20,7 @@ encabezados = [
     "Tipo de Juicio",
     "Descripcion",
     "Expediente",
-    "Archivo",
+    "Descargar URL",
 ]
 
 app = typer.Typer()
@@ -84,7 +84,7 @@ def consultar(
             registro["tipo_juicio"],
             registro["descripcion"],
             registro["expediente"],
-            registro["archivo"],
+            registro["descargar_url"],
         )
     console.print(table)
 
@@ -152,7 +152,7 @@ def guardar(
                         registro["tipo_juicio"],
                         registro["descripcion"],
                         registro["expediente"],
-                        registro["archivo"],
+                        registro["descargar_url"],
                     ]
                 )
             offset += LIMIT
@@ -202,7 +202,7 @@ def mostrar_reporte_diario(
             registro["tipo_juicio"],
             registro["descripcion"],
             registro["expediente"],
-            registro["archivo"],
+            registro["descargar_url"],
         )
     console.print(table)
 

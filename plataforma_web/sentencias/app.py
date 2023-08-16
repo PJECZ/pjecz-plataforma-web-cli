@@ -23,7 +23,7 @@ encabezados = [
     "Expediente",
     "Fecha",
     "Es P.G.",
-    "Archivo",
+    "Descargar URL",
 ]
 
 app = typer.Typer()
@@ -93,7 +93,7 @@ def consultar(
             registro["expediente"],
             registro["fecha"],
             "SI" if registro["es_perspectiva_genero"] else "NO",
-            registro["archivo"],
+            registro["descargar_url"],
         )
     console.print(table)
 
@@ -167,7 +167,7 @@ def guardar(
                         registro["expediente"],
                         registro["fecha"],
                         "SI" if registro["es_perspectiva_genero"] else "NO",
-                        registro["archivo"],
+                        registro["descargar_url"],
                     ]
                 )
             offset += LIMIT
@@ -220,7 +220,7 @@ def mostrar_reporte_diario(
             registro["expediente"],
             registro["fecha"],
             "SI" if registro["es_perspectiva_genero"] else "NO",
-            registro["archivo"],
+            registro["descargar_url"],
         )
     console.print(table)
 
