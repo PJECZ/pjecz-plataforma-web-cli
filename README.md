@@ -53,14 +53,20 @@ poetry install
 
 ## Configurar
 
-Crear un archivo `.env` en la raiz del proyecto con el siguiente contenido:
+Crear un archivo `.env` en la raiz del proyecto donde configure el siguiente contenido:
 
 ```ini
-# API
+# Plataforma Web API key
 API_KEY=XXXXXXXX.XXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXX
-HOST=http://localhost:8002
-LIMIT=100
-TIMEOUT=20
+HOST=https://host
+
+# Citas V2 API key
+CITAS_V2_API_KEY=XXXXXXXX.XXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXX
+CITAS_V2_HOST=https://host
+
+# Ajuste las opciones para Requests
+LIMIT=40
+TIMEOUT=24
 SLEEP=2
 
 # SENDGRID
@@ -68,7 +74,7 @@ SENDGRID_API_KEY=SG.XXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 SENDGRID_FROM_EMAIL=remitente@pjecz.gob.mx
 
 # SIGA rutas en el servidor Justicia
-SIGA_JUSTICIA_RUTA=/mnt/respaldos/siga
+SIGA_JUSTICIA_RUTA=
 ```
 
 Crear un archivo `.bashrc` para activar el entorno virtual y cargar las variables de entorno:
@@ -91,13 +97,15 @@ if [ -f .env ]
 then
     echo "-- Variables de entorno"
     export $(grep -v '^#' .env | xargs)
-    echo "   API_KEY: ${API_KEY}"
-    echo "   HOST: ${HOST}"
-    echo "   LIMIT: ${LIMIT}"
-    echo "   TIMEOUT: ${TIMEOUT}"
-    echo "   SIGA_JUSTICIA_RUTA: ${SIGA_JUSTICIA_RUTA}"
-    echo "   SLEEP: ${SLEEP}"
-    echo "   SENDGRID_API_KEY: ${SENDGRID_API_KEY}"
+    echo "   API_KEY:             ${API_KEY}"
+    echo "   API_URL:             ${API_URL}"
+    echo "   CITAS_V2_API_KEY:    ${CITAS_V2_API_KEY}"
+    echo "   CITAS_V2_HOST:       ${CITAS_V2_HOST}"
+    echo "   LIMIT:               ${LIMIT}"
+    echo "   TIMEOUT:             ${TIMEOUT}"
+    echo "   SLEEP:               ${SLEEP}"
+    echo "   SIGA_JUSTICIA_RUTA:  ${SIGA_JUSTICIA_RUTA}"
+    echo "   SENDGRID_API_KEY:    ${SENDGRID_API_KEY}"
     echo "   SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL}"
     echo
 fi

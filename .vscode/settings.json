@@ -2,8 +2,9 @@
   "black-formatter.args": ["--line-length", "128"],
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "github.branchProtection": true,
   "git.branchProtection": ["main"],
-  "pylint.args": ["--max-line-length=128"],
+  "pylint.args": ["--max-line-length", "128"],
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   }
