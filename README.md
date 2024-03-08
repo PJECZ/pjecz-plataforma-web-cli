@@ -57,12 +57,12 @@ Crear un archivo `.env` en la raiz del proyecto donde configure el siguiente con
 
 ```ini
 # Plataforma Web API key
+API_HOST=https://servidor
 API_KEY=XXXXXXXX.XXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXX
-HOST=https://host
 
 # Citas V2 API key
+CITAS_V2_API_HOST=https://servidor
 CITAS_V2_API_KEY=XXXXXXXX.XXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXX
-CITAS_V2_HOST=https://host
 
 # Ajuste las opciones para Requests
 LIMIT=40
@@ -97,10 +97,10 @@ if [ -f .env ]
 then
     echo "-- Variables de entorno"
     export $(grep -v '^#' .env | xargs)
+    echo "   API_HOST:            ${API_HOST}"
     echo "   API_KEY:             ${API_KEY}"
-    echo "   API_URL:             ${API_URL}"
+    echo "   CITAS_V2_API_HOST:   ${CITAS_V2_API_HOST}"
     echo "   CITAS_V2_API_KEY:    ${CITAS_V2_API_KEY}"
-    echo "   CITAS_V2_HOST:       ${CITAS_V2_HOST}"
     echo "   LIMIT:               ${LIMIT}"
     echo "   TIMEOUT:             ${TIMEOUT}"
     echo "   SLEEP:               ${SLEEP}"
