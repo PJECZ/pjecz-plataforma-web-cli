@@ -1,6 +1,7 @@
 """
 Config Settings
 """
+
 import os
 
 from dotenv import load_dotenv
@@ -9,12 +10,13 @@ import pytz
 load_dotenv()
 
 # Plataforma Web API key
+API_HOST = os.getenv("API_HOST", "")
+API_URL = API_HOST + "/v4"
 API_KEY = os.getenv("API_KEY", "")
-API_URL = os.getenv("API_URL", "")
 
 # Citas V2 API key
-CITAS_V2_HOST = os.getenv("CITAS_V2_HOST", "")
-CITAS_V2_API_URL = CITAS_V2_HOST + "/v3"
+CITAS_V2_API_HOST = os.getenv("CITAS_V2_API_HOST", "")
+CITAS_V2_API_URL = CITAS_V2_API_HOST + "/v3"
 CITAS_V2_API_KEY = os.getenv("CITAS_V2_API_KEY", "")
 
 # Parametros limit, timeout y sleep en segundos

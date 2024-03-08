@@ -1,6 +1,4 @@
-.bashrc
 .directory
-.env
 .DS_Store
 .~lock.*
 
@@ -12,8 +10,12 @@
 *.log
 *.sql
 
-*.egg-info/
-__pycache__/
+.bashrc
+.env
+poetry.lock
 
-/poetry.lock
+__pycache__/
+*.egg-info/
+
 /.venv/
+/venv/
